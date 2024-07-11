@@ -1,0 +1,18 @@
+{
+  "name": "github-usernames-to-names",
+  "version": "0.9.0",
+  "description": "Replace the username with the actual name of the user from their profile. This is useful if you work in an organization where usernames are ambiguous.",
+  "main": "github-usernames-to-names.user-srcipt.js",
+  "scripts": {
+    "build": "tsx scripts/build.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Szymon Tondowski",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "chalk": "^5.3.0",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}
