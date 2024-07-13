@@ -17,7 +17,7 @@ export const appendCSS = (styles, { sourceName = '' } = {}) => {
 };
 
 
-window.U2N.cache.html = {};
+window.U2N.cache.HTML = {};
 
 export const render = (HTML = '', id) => {
     if (HTML === window.U2N.cache.HTML[id]) {

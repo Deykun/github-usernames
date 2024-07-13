@@ -16,6 +16,7 @@
 window.U2N = {
   version: 0.9,
   isDevMode: true,
+  cache: { },
 }
 
 const userScriptLogger = (params) => {
@@ -44,6 +45,9 @@ const domReady = (fn) => {
 const initU2N = async () => {
     try {
     /* import @/dom.js */
+    /* import @/render-users.js */
+
+    renderUsers();
 
     } catch (error) {
         userScriptLogger({
