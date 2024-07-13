@@ -1,14 +1,12 @@
 // ==UserScript==
 // @namespace       deykun
 // @name            Usernames to names - GitHub
-// @name:en         Usernames to names - GitHub
 // @description     Replace the username with the actual name of the user from their profile. This is useful if you work in an organization where usernames are ambiguous.
-// @description:en  Replace the username with the actual name of the user from their profile. This is useful if you work in an organization where usernames are ambiguous.
 // @author          deykun
 // @version         0.9
 // @include	        https://*github.com*
 // @grant           none
-// @run-at		      document-start
+// @run-at		    document-start
 // @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/github-usernames-to-names.user-srcipt.js
 // @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/github-usernames-to-names.user-srcipt.js
 // ==/UserScript==
@@ -18,6 +16,7 @@
 window.U2N = {
   version: 0.9,
   isDevMode: true,
+  cache: { },
 }
 
 const userScriptLogger = (params) => {
@@ -45,7 +44,10 @@ const domReady = (fn) => {
 
 const initU2N = async () => {
     try {
-      console.log('Hi.')
+    /* import @/dom.js */
+    /* import @/render-users.js */
+
+    renderUsers();
 
     } catch (error) {
         userScriptLogger({
