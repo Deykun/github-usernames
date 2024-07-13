@@ -15,7 +15,7 @@ appendCSS(`
   [data-u2n-username]::before {
     display: inline-block;
     align-self: center;
-    content: attr(data-gpc-user);
+    content: attr(data-u2n-username);
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
