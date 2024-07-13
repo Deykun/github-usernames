@@ -96,24 +96,21 @@ const render = (HTML = '', id) => {
     const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1]
-    if (el.textContent.includes(username)) {
-      return {
-        el,
-        username,
-      }
-    }
 
-    return null;
-  }).filter(Boolean)
+    return {
+      el,
+      username,
+    }
+  })
 
   return links;
 }
 
 appendCSS(`
-  [data-u2n-username]::after {
+  [data-u2n-username]::before {
     display: inline-block;
     align-self: center;
-    content: attr(data-u2n-username);
+    content: attr(data-gpc-user);
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -131,7 +128,7 @@ appendCSS(`
     transition: 0.15s ease-in-out; 
   }
 
-  [data-u2n-username]:hover::after {
+  [data-u2n-username]:hover::before {
     color: #0054ae !important;
     background: #dbedff !important;
   }
