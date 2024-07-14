@@ -15,7 +15,7 @@ const getUserElements = () => {
   return links;
 }
 
-appendCSS(`
+appendCSS(` 
   [data-u2n-username]::before {
     display: inline-block;
     align-self: center;

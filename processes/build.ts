@@ -13,11 +13,19 @@ partPaths.forEach((path) => {
   const partImportInTemplate = `/* import @/${path} */`
       
   if (template.includes(partImportInTemplate)) {
-    const content = fs.readFileSync(`./src/user-script/parts/${path}`, 'utf8');
+    let content = fs.readFileSync(`./src/user-script/parts/${path}`, 'utf8');
 
-    const contentWithoutExport = content.replace(/export const/g, 'const');
+    // Export are removed from user-script
+    content = content.replace(/export const/g, 'const');
 
-    template = template.replace(partImportInTemplate, contentWithoutExport);
+    // Eslint comments are removed from user-scripts
+    [
+      '/* eslint-disable no-undef */',
+  ].forEach((eslintComment) => {
+    content = content.replaceAll(eslintComment, '');
+  });
+
+    template = template.replace(partImportInTemplate, content);
     console.log(` - @/${chalk.blue(path)} was imported`);;
   } else {
     console.log(` - @/${chalk.blue(path)} was ${chalk.red("skipped")}`);;

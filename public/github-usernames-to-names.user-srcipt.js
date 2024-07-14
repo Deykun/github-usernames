@@ -47,9 +47,7 @@ const domReady = (fn) => {
 
 const initU2N = async () => {
     try {
-    const x = (a, b) => a + b;
-
-const appendCSS = (styles, { sourceName = '' } = {}) => {
+    const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
       /* Already appended */
@@ -98,7 +96,8 @@ const render = (HTML = '', source) => {
 
     document.body.appendChild(el);
 };
-    const getUserElements = () => {
+    
+const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1]
 
