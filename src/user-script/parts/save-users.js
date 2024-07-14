@@ -15,8 +15,6 @@ export const getUserFromHovercardIfPossible = () => {
       avatarSrc,
       name,
     };
-
-    // const elUserNickClick = elHovercard.parentNode.nextElementSibling;
   }
 
   return undefined;
