@@ -6,21 +6,21 @@ console.log()
 console.log(chalk.green("Building..."));
 console.log()
 
-let template = fs.readFileSync(`./src/template.js`, 'utf-8')
-const partPaths = fs.readdirSync('./src/parts');
+let template = fs.readFileSync(`./src/user-script/template.js`, 'utf-8')
+const partPaths = fs.readdirSync('./src/user-script/parts');
 
 partPaths.forEach((path) => {
   const partImportInTemplate = `/* import @/${path} */`
       
   if (template.includes(partImportInTemplate)) {
-    const content = fs.readFileSync(`./src/parts/${path}`, 'utf8');
+    const content = fs.readFileSync(`./src/user-script/parts/${path}`, 'utf8');
 
     const contentWithoutExport = content.replace(/export const/g, 'const');
 
     template = template.replace(partImportInTemplate, contentWithoutExport);
-    console.log(` - @/${path} was imported`);;
+    console.log(` - @/${chalk.blue(path)} was imported`);;
   } else {
-    console.log(` - @/${path} was skipped`);;
+    console.log(` - @/${chalk.blue(path)} was ${chalk.red("skipped")}`);;
   }
 })
 
@@ -28,4 +28,4 @@ console.log()
 console.log(chalk.green("Saving..."));
 console.log()
 
-fs.writeFileSync('./github-usernames-to-names.user-srcipt.js', template);
+fs.writeFileSync('./public/github-usernames-to-names.user-srcipt.js', template);

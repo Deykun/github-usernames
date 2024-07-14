@@ -1,5 +1,7 @@
+export const x = (a, b) => a + b;
+
 export const appendCSS = (styles, { sourceName = '' } = {}) => {
-  const appendOnceSelector = sourceName ? `g-u2n-cache-${sourceName}`.trim() : undefined;
+  const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
       /* Already appended */
       if (document.getElementById(appendOnceSelector)) {
@@ -16,10 +18,9 @@ export const appendCSS = (styles, { sourceName = '' } = {}) => {
   document.head.append(style);
 };
 
+export const render = (HTML = '', source) => {
+    const id = `g-u2n-html-${source}`
 
-window.U2N.cache.HTML = {};
-
-export const render = (HTML = '', id) => {
     if (HTML === window.U2N.cache.HTML[id]) {
         /* Don't rerender if HTML is the same */
         return;
@@ -43,6 +44,7 @@ export const render = (HTML = '', id) => {
 
     const el = document.createElement('div');
     el.id = id;
+    el.setAttribute('data-testid', id);
     el.innerHTML = HTML;
 
     document.body.appendChild(el);

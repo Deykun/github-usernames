@@ -13,11 +13,7 @@
 
 'use strict';
 
-window.U2N = {
-  version: 0.9,
-  isDevMode: true,
-  cache: { },
-}
+/* import @/constants.js */
 
 const userScriptLogger = (params) => {
     if (params.isError) {
