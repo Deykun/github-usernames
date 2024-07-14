@@ -5,4 +5,4 @@ window.U2N = {
     HTML: {},
     CSS: {},
   },
-}
+};

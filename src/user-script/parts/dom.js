@@ -18,7 +18,7 @@ export const appendCSS = (styles, { sourceName = '' } = {}) => {
 
 // eslint-disable-next-line default-param-last
 export const render = (HTML = '', source) => {
-  const id = `g-u2n-html-${source}`
+  const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
     /* Don't rerender if HTML is the same */
