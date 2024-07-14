@@ -20,6 +20,7 @@ window.U2N = {
     HTML: {},
     CSS: {},
   },
+  usersByIds: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
 };
 
 
@@ -105,6 +106,17 @@ const render = (HTML = '', source) => {
   document.body.appendChild(el);
 };
 
+    const debounce = (fn, time) => {
+  let timeoutHandler;
+
+  return (...args) => {
+    clearTimeout(timeoutHandler);
+    timeoutHandler = setTimeout(() => {
+      fn(...args);
+    }, time);
+  };
+};
+
     const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
@@ -123,7 +135,7 @@ const render = (HTML = '', source) => {
 };
 
 appendCSS(` 
-  [data-u2n-username]::before {
+  [data-u2n-username]::after {
     display: inline-block;
     align-self: center;
     content: attr(data-u2n-username);
@@ -134,7 +146,6 @@ appendCSS(`
     letter-spacing: 0.05em;
     font-weight: 600;
     font-style: normal;
-    text-transform: capitalize;
     text-decoration: none !important;
     line-height: 19px;
     height: 18px;
@@ -144,7 +155,7 @@ appendCSS(`
     transition: 0.15s ease-in-out; 
   }
 
-  [data-u2n-username]:hover::before {
+  [data-u2n-username]:hover::after {
     color: #0054ae !important;
     background: #dbedff !important;
   }
@@ -157,8 +168,25 @@ const renderUsers = () => {
   elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username));
 };
 
+    const rerender = () => {
+  renderUsers();
+};
 
-    renderUsers();
+
+    rerender();
+
+    const debouncedRerender = debounce(() => {
+      render();
+    }, 500);
+
+    const observer = new MutationObserver(debouncedRerender);
+    const config = {
+      childList: true,
+      subtree: true,
+    };
+    observer.observe(document.body, config);
+
+    // saveNewUsers
   } catch (error) {
     userScriptLogger({
       isError: true, isCritical: true, message: 'initU2N() failed', error,

@@ -16,7 +16,7 @@ const getUserElements = () => {
 };
 
 appendCSS(` 
-  [data-u2n-username]::before {
+  [data-u2n-username]::after {
     display: inline-block;
     align-self: center;
     content: attr(data-u2n-username);
@@ -27,7 +27,6 @@ appendCSS(`
     letter-spacing: 0.05em;
     font-weight: 600;
     font-style: normal;
-    text-transform: capitalize;
     text-decoration: none !important;
     line-height: 19px;
     height: 18px;
@@ -37,7 +36,7 @@ appendCSS(`
     transition: 0.15s ease-in-out; 
   }
 
-  [data-u2n-username]:hover::before {
+  [data-u2n-username]:hover::after {
     color: #0054ae !important;
     background: #dbedff !important;
   }

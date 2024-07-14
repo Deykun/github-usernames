@@ -9,7 +9,7 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "build-us": "tsx processes/build.ts",
-    "dev-us": "ts-node --watch src/user-script --exec npm run build-us",
+    "dev-us": "nodemon --watch src/user-script --exec npm run build-us",
     "dev-us-server": "tsx processes/dev-script.ts",
     "preview": "vite preview",
     "test": "vitest",

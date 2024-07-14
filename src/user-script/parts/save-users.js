@@ -1,5 +1,3 @@
-const saveNewUsers = () => {};
-
 export const getUserFromHovercardIfPossible = () => {
   const elHovercard = document.querySelector('.user-hovercard-avatar');
 

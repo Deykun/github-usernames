@@ -5,4 +5,5 @@ window.U2N = {
     HTML: {},
     CSS: {},
   },
+  usersByIds: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
 };
