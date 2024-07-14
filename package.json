@@ -3,6 +3,8 @@
   "private": true,
   "version": "0.9.0",
   "type": "module",
+  "author": "Szymon Tondowski",
+  "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
