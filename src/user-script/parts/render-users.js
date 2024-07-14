@@ -1,19 +1,19 @@
 const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
-    const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1]
+    const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
 
     if (username && el.textContent.includes(username)) {
       return {
         el,
         username,
-      }
+      };
     }
 
     return undefined;
-  }).filter(Boolean)
+  }).filter(Boolean);
 
   return links;
-}
+};
 
 appendCSS(` 
   [data-u2n-username]::before {
@@ -42,10 +42,10 @@ appendCSS(`
     background: #dbedff !important;
   }
 
-`, { sourceName: 'render-users' })
+`, { sourceName: 'render-users' });
 
 export const renderUsers = () => {
   const elements = getUserElements();
 
-  elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username))
-}
+  elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username));
+};
