@@ -16,7 +16,10 @@
 window.U2N = {
   version: 0.9,
   isDevMode: true,
-  cache: { },
+  cache: { 
+    HTML: {},
+    CSS: {},
+  },
 }
 
 const userScriptLogger = (params) => {
@@ -45,7 +48,7 @@ const domReady = (fn) => {
 const initU2N = async () => {
     try {
     const appendCSS = (styles, { sourceName = '' } = {}) => {
-  const appendOnceSelector = sourceName ? `g-u2n-cache-${sourceName}`.trim() : undefined;
+  const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
       /* Already appended */
       if (document.getElementById(appendOnceSelector)) {
@@ -62,10 +65,9 @@ const initU2N = async () => {
   document.head.append(style);
 };
 
+const render = (HTML = '', source) => {
+    const id = `g-u2n-html-${source}`
 
-window.U2N.cache.HTML = {};
-
-const render = (HTML = '', id) => {
     if (HTML === window.U2N.cache.HTML[id]) {
         /* Don't rerender if HTML is the same */
         return;
@@ -89,19 +91,25 @@ const render = (HTML = '', id) => {
 
     const el = document.createElement('div');
     el.id = id;
+    el.setAttribute('data-testid', id);
     el.innerHTML = HTML;
 
     document.body.appendChild(el);
 };
-    const getUserElements = () => {
+    
+const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1]
 
-    return {
-      el,
-      username,
+    if (username && el.textContent.includes(username)) {
+      return {
+        el,
+        username,
+      }
     }
-  })
+
+    return undefined;
+  }).filter(Boolean)
 
   return links;
 }

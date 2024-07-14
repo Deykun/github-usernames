@@ -2,16 +2,20 @@ const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1]
 
-    return {
-      el,
-      username,
+    if (username && el.textContent.includes(username)) {
+      return {
+        el,
+        username,
+      }
     }
-  })
+
+    return undefined;
+  }).filter(Boolean)
 
   return links;
 }
 
-appendCSS(`
+appendCSS(` 
   [data-u2n-username]::before {
     display: inline-block;
     align-self: center;
