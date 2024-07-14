@@ -142,6 +142,8 @@ const render = (HTML = '', source) => {
   };
 };
 
+const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
+
     const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
@@ -160,7 +162,11 @@ const render = (HTML = '', source) => {
 };
 
 appendCSS(` 
-  [data-u2n-display-name]::after {
+  [data-u2n-display-name] {
+    font-size: 0;
+  }
+
+  .u2n-tag {
     display: inline-block;
     align-self: center;
     content: attr(data-u2n-display-name);
@@ -178,9 +184,22 @@ appendCSS(`
     color: #00293e;
     background-color: #f2f2f2;
     transition: 0.15s ease-in-out; 
+    position: relative;
   }
 
-  [data-u2n-display-name]:hover::after {
+  .u2n-tag img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  .u2n-tag img + * {
+    margin-left: 1.5em;
+  }
+
+  .u2n-tag:hover {
     color: #0054ae !important;
     background: #dbedff !important;
   }
@@ -191,16 +210,39 @@ const renderUsers = () => {
   const elements = getUserElements();
 
   elements.forEach(({ el, username }) => {
-    const name = window.U2N.usersByUsernames?.[username]?.name;
-    if (!name) {
+    let displayName = username;
+
+    const user = window.U2N.usersByUsernames?.[username];
+
+    const name = user?.name;
+    if (name) {
+      const [firstName, ...rest] = name.toLowerCase().split(' ');
+
+      displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+    }
+
+    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+
+    if (isAlreadySet) {
       return;
     }
 
-    const [firstName, ...rest] = name.toLowerCase().split(' ');
-
-    const displayName = `@${firstName} ${rest.map((nextName) => `${nextName.at(0)}.`).join(' ')}`;
-
+    el.querySelector('.u2n-tags-holder')?.remove();
     el.setAttribute('data-u2n-display-name', displayName);
+
+    const tagsHolderEl = document.createElement('span');
+    tagsHolderEl.setAttribute('class', 'u2n-tags-holder u2n-tags--user');
+
+    const tagEl = document.createElement('span');
+    tagEl.setAttribute('class', 'u2n-tag');
+
+    const avatarSrc = user?.avatarSrc || '';
+
+    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : ''}<span>${displayName}</span>`;
+
+    tagsHolderEl.append(tagEl);
+
+    el.append(tagsHolderEl);
   });
 };
 

@@ -8,3 +8,5 @@ const debounce = (fn, time) => {
     }, time);
   };
 };
+
+export const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
