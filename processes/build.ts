@@ -28,7 +28,9 @@ partPaths.forEach((path) => {
     template = template.replace(partImportInTemplate, content);
     console.log(` - @/${chalk.blue(path)} was imported`);;
   } else {
-    console.log(` - @/${chalk.blue(path)} was ${chalk.red("skipped")}`);;
+    if (!path.includes('test.js')){
+      console.log(` - @/${chalk.blue(path)} was ${chalk.red("skipped")}`);;
+    }
   }
 })
 

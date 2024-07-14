@@ -16,10 +16,14 @@ const getUserElements = () => {
 };
 
 appendCSS(` 
-  [data-u2n-username]::before {
+  [data-u2n-display-name] {
+    font-size: 0;
+  }
+
+  .u2n-tag {
     display: inline-block;
     align-self: center;
-    content: attr(data-u2n-username);
+    content: attr(data-u2n-display-name);
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -27,7 +31,6 @@ appendCSS(`
     letter-spacing: 0.05em;
     font-weight: 600;
     font-style: normal;
-    text-transform: capitalize;
     text-decoration: none !important;
     line-height: 19px;
     height: 18px;
@@ -35,9 +38,22 @@ appendCSS(`
     color: #00293e;
     background-color: #f2f2f2;
     transition: 0.15s ease-in-out; 
+    position: relative;
   }
 
-  [data-u2n-username]:hover::before {
+  .u2n-tag img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  .u2n-tag img + * {
+    margin-left: 1.5em;
+  }
+
+  .u2n-tag:hover {
     color: #0054ae !important;
     background: #dbedff !important;
   }
@@ -47,5 +63,39 @@ appendCSS(`
 export const renderUsers = () => {
   const elements = getUserElements();
 
-  elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username));
+  elements.forEach(({ el, username }) => {
+    let displayName = username;
+
+    const user = window.U2N.usersByUsernames?.[username];
+
+    const name = user?.name;
+    if (name) {
+      const [firstName, ...rest] = name.toLowerCase().split(' ');
+
+      displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+    }
+
+    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+
+    if (isAlreadySet) {
+      return;
+    }
+
+    el.querySelector('.u2n-tags-holder')?.remove();
+    el.setAttribute('data-u2n-display-name', displayName);
+
+    const tagsHolderEl = document.createElement('span');
+    tagsHolderEl.setAttribute('class', 'u2n-tags-holder u2n-tags--user');
+
+    const tagEl = document.createElement('span');
+    tagEl.setAttribute('class', 'u2n-tag');
+
+    const avatarSrc = user?.avatarSrc || '';
+
+    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : ''}<span>${displayName}</span>`;
+
+    tagsHolderEl.append(tagEl);
+
+    el.append(tagsHolderEl);
+  });
 };

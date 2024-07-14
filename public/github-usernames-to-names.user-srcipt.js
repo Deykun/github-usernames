@@ -20,6 +20,7 @@ window.U2N = {
     HTML: {},
     CSS: {},
   },
+  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
 };
 
 
@@ -52,6 +53,31 @@ const domReady = (fn) => {
 
 const initU2N = async () => {
   try {
+    const saveNewUsers = (usersByNumber = {}) => {
+  const oldUserByUsernames = localStorage.getItem('u2n-users')
+    ? JSON.parse(localStorage.getItem('u2n-users'))
+    : {};
+
+  const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
+    stack[username] = value;
+
+    return stack;
+  }, JSON.parse(JSON.stringify(oldUserByUsernames)));
+
+  const didChange = JSON.stringify(oldUserByUsernames) !== JSON.stringify(newUserByUsernames);
+
+  if (!didChange) {
+    return false;
+  }
+
+  window.U2N.usersByUsernames = newUserByUsernames;
+  localStorage.setItem('u2n-users', JSON.stringify(window.U2N.usersByUsernames));
+
+  renderUsers();
+
+  return true;
+};
+
     const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
@@ -105,6 +131,19 @@ const render = (HTML = '', source) => {
   document.body.appendChild(el);
 };
 
+    const debounce = (fn, time) => {
+  let timeoutHandler;
+
+  return (...args) => {
+    clearTimeout(timeoutHandler);
+    timeoutHandler = setTimeout(() => {
+      fn(...args);
+    }, time);
+  };
+};
+
+const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
+
     const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
@@ -123,10 +162,14 @@ const render = (HTML = '', source) => {
 };
 
 appendCSS(` 
-  [data-u2n-username]::before {
+  [data-u2n-display-name] {
+    font-size: 0;
+  }
+
+  .u2n-tag {
     display: inline-block;
     align-self: center;
-    content: attr(data-u2n-username);
+    content: attr(data-u2n-display-name);
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -134,7 +177,6 @@ appendCSS(`
     letter-spacing: 0.05em;
     font-weight: 600;
     font-style: normal;
-    text-transform: capitalize;
     text-decoration: none !important;
     line-height: 19px;
     height: 18px;
@@ -142,9 +184,22 @@ appendCSS(`
     color: #00293e;
     background-color: #f2f2f2;
     transition: 0.15s ease-in-out; 
+    position: relative;
   }
 
-  [data-u2n-username]:hover::before {
+  .u2n-tag img {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+  }
+
+  .u2n-tag img + * {
+    margin-left: 1.5em;
+  }
+
+  .u2n-tag:hover {
     color: #0054ae !important;
     background: #dbedff !important;
   }
@@ -154,11 +209,101 @@ appendCSS(`
 const renderUsers = () => {
   const elements = getUserElements();
 
-  elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username));
+  elements.forEach(({ el, username }) => {
+    let displayName = username;
+
+    const user = window.U2N.usersByUsernames?.[username];
+
+    const name = user?.name;
+    if (name) {
+      const [firstName, ...rest] = name.toLowerCase().split(' ');
+
+      displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+    }
+
+    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+
+    if (isAlreadySet) {
+      return;
+    }
+
+    el.querySelector('.u2n-tags-holder')?.remove();
+    el.setAttribute('data-u2n-display-name', displayName);
+
+    const tagsHolderEl = document.createElement('span');
+    tagsHolderEl.setAttribute('class', 'u2n-tags-holder u2n-tags--user');
+
+    const tagEl = document.createElement('span');
+    tagEl.setAttribute('class', 'u2n-tag');
+
+    const avatarSrc = user?.avatarSrc || '';
+
+    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : ''}<span>${displayName}</span>`;
+
+    tagsHolderEl.append(tagEl);
+
+    el.append(tagsHolderEl);
+  });
+};
+
+    const rerender = () => {
+  renderUsers();
+};
+
+    const getUserFromHovercardIfPossible = () => {
+  const elHovercard = document.querySelector('.user-hovercard-avatar');
+
+  if (elHovercard) {
+    const avatarSrc = elHovercard.querySelector('.avatar-user')?.getAttribute('src')?.split('?')[0] || '';
+    const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
+    const username = elHovercard.querySelector('.avatar-user')?.getAttribute('alt')?.replace('@', '').trim();
+    const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
+
+    if (!username) {
+      return undefined;
+    }
+
+    return {
+      id,
+      username,
+      avatarSrc,
+      name,
+    };
+  }
+
+  return undefined;
+};
+
+const saveNewUsersIfPossible = () => {
+  const newUser = getUserFromHovercardIfPossible();
+
+  if (newUser) {
+    const wasUpdated = JSON.stringify(window.U2N.usersByUsernames?.[newUser.username])
+      !== JSON.stringify(newUser);
+
+    if (wasUpdated) {
+      saveNewUsers({
+        [newUser.username]: newUser,
+      });
+    }
+  }
 };
 
 
-    renderUsers();
+    saveNewUsersIfPossible();
+    rerender();
+
+    const debouncedRefresh = debounce(() => {
+      saveNewUsersIfPossible();
+      rerender();
+    }, 500);
+
+    const observer = new MutationObserver(debouncedRefresh);
+    const config = {
+      childList: true,
+      subtree: true,
+    };
+    observer.observe(document.body, config);
   } catch (error) {
     userScriptLogger({
       isError: true, isCritical: true, message: 'initU2N() failed', error,
