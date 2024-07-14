@@ -1,22 +1,22 @@
 const saveNewUsers = (usersByNumber = {}) => {
-  const oldUserById = localStorage.getItem('u2n-users')
+  const oldUserByUsernames = localStorage.getItem('u2n-users')
     ? JSON.parse(localStorage.getItem('u2n-users'))
     : {};
 
-  const newUserById = Object.entries(usersByNumber).reduce((stack, [id, value]) => {
-    stack[id] = value;
+  const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
+    stack[username] = value;
 
     return stack;
-  }, oldUserById);
+  }, JSON.parse(JSON.stringify(oldUserByUsernames)));
 
-  const didChange = JSON.stringify(oldUserById) !== JSON.stringify(newUserById);
+  const didChange = JSON.stringify(oldUserByUsernames) !== JSON.stringify(newUserByUsernames);
 
   if (!didChange) {
     return false;
   }
 
-  window.U2N.usersByIds = newUserById;
-  localStorage.setItem('u2n-users', JSON.stringify(window.U2N.usersByIds));
+  window.U2N.usersByUsernames = newUserByUsernames;
+  localStorage.setItem('u2n-users', JSON.stringify(window.U2N.usersByUsernames));
 
   renderUsers();
 

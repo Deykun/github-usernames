@@ -44,25 +44,27 @@ const domReady = (fn) => {
 
 const initU2N = async () => {
   try {
+    /* import @/db.js */
     /* import @/dom.js */
     /* import @/helpers.js */
     /* import @/render-users.js */
     /* import @/render.js */
+    /* import @/save-users.js */
 
+    saveNewUsersIfPossible();
     rerender();
 
-    const debouncedRerender = debounce(() => {
-      render();
+    const debouncedRefresh = debounce(() => {
+      saveNewUsersIfPossible();
+      rerender();
     }, 500);
 
-    const observer = new MutationObserver(debouncedRerender);
+    const observer = new MutationObserver(debouncedRefresh);
     const config = {
       childList: true,
       subtree: true,
     };
     observer.observe(document.body, config);
-
-    // saveNewUsers
   } catch (error) {
     userScriptLogger({
       isError: true, isCritical: true, message: 'initU2N() failed', error,

@@ -16,10 +16,10 @@ const getUserElements = () => {
 };
 
 appendCSS(` 
-  [data-u2n-username]::after {
+  [data-u2n-display-name]::after {
     display: inline-block;
     align-self: center;
-    content: attr(data-u2n-username);
+    content: attr(data-u2n-display-name);
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -36,7 +36,7 @@ appendCSS(`
     transition: 0.15s ease-in-out; 
   }
 
-  [data-u2n-username]:hover::after {
+  [data-u2n-display-name]:hover::after {
     color: #0054ae !important;
     background: #dbedff !important;
   }
@@ -46,5 +46,16 @@ appendCSS(`
 export const renderUsers = () => {
   const elements = getUserElements();
 
-  elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username));
+  elements.forEach(({ el, username }) => {
+    const name = window.U2N.usersByUsernames?.[username]?.name;
+    if (!name) {
+      return;
+    }
+
+    const [firstName, ...rest] = name.toLowerCase().split(' ');
+
+    const displayName = `@${firstName} ${rest.map((nextName) => `${nextName.at(0)}.`).join(' ')}`;
+
+    el.setAttribute('data-u2n-display-name', displayName);
+  });
 };

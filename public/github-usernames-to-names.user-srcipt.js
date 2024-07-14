@@ -20,7 +20,7 @@ window.U2N = {
     HTML: {},
     CSS: {},
   },
-  usersByIds: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
+  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
 };
 
 
@@ -53,6 +53,31 @@ const domReady = (fn) => {
 
 const initU2N = async () => {
   try {
+    const saveNewUsers = (usersByNumber = {}) => {
+  const oldUserByUsernames = localStorage.getItem('u2n-users')
+    ? JSON.parse(localStorage.getItem('u2n-users'))
+    : {};
+
+  const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
+    stack[username] = value;
+
+    return stack;
+  }, JSON.parse(JSON.stringify(oldUserByUsernames)));
+
+  const didChange = JSON.stringify(oldUserByUsernames) !== JSON.stringify(newUserByUsernames);
+
+  if (!didChange) {
+    return false;
+  }
+
+  window.U2N.usersByUsernames = newUserByUsernames;
+  localStorage.setItem('u2n-users', JSON.stringify(window.U2N.usersByUsernames));
+
+  renderUsers();
+
+  return true;
+};
+
     const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
@@ -135,10 +160,10 @@ const render = (HTML = '', source) => {
 };
 
 appendCSS(` 
-  [data-u2n-username]::after {
+  [data-u2n-display-name]::after {
     display: inline-block;
     align-self: center;
-    content: attr(data-u2n-username);
+    content: attr(data-u2n-display-name);
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -155,7 +180,7 @@ appendCSS(`
     transition: 0.15s ease-in-out; 
   }
 
-  [data-u2n-username]:hover::after {
+  [data-u2n-display-name]:hover::after {
     color: #0054ae !important;
     background: #dbedff !important;
   }
@@ -165,28 +190,78 @@ appendCSS(`
 const renderUsers = () => {
   const elements = getUserElements();
 
-  elements.forEach(({ el, username }) => el.setAttribute('data-u2n-username', username));
+  elements.forEach(({ el, username }) => {
+    const name = window.U2N.usersByUsernames?.[username]?.name;
+    if (!name) {
+      return;
+    }
+
+    const [firstName, ...rest] = name.toLowerCase().split(' ');
+
+    const displayName = `@${firstName} ${rest.map((nextName) => `${nextName.at(0)}.`).join(' ')}`;
+
+    el.setAttribute('data-u2n-display-name', displayName);
+  });
 };
 
     const rerender = () => {
   renderUsers();
 };
 
+    const getUserFromHovercardIfPossible = () => {
+  const elHovercard = document.querySelector('.user-hovercard-avatar');
 
+  if (elHovercard) {
+    const avatarSrc = elHovercard.querySelector('.avatar-user')?.getAttribute('src')?.split('?')[0] || '';
+    const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
+    const username = elHovercard.querySelector('.avatar-user')?.getAttribute('alt')?.replace('@', '').trim();
+    const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
+
+    if (!username) {
+      return undefined;
+    }
+
+    return {
+      id,
+      username,
+      avatarSrc,
+      name,
+    };
+  }
+
+  return undefined;
+};
+
+const saveNewUsersIfPossible = () => {
+  const newUser = getUserFromHovercardIfPossible();
+
+  if (newUser) {
+    const wasUpdated = JSON.stringify(window.U2N.usersByUsernames?.[newUser.username])
+      !== JSON.stringify(newUser);
+
+    if (wasUpdated) {
+      saveNewUsers({
+        [newUser.username]: newUser,
+      });
+    }
+  }
+};
+
+
+    saveNewUsersIfPossible();
     rerender();
 
-    const debouncedRerender = debounce(() => {
-      render();
+    const debouncedRefresh = debounce(() => {
+      saveNewUsersIfPossible();
+      rerender();
     }, 500);
 
-    const observer = new MutationObserver(debouncedRerender);
+    const observer = new MutationObserver(debouncedRefresh);
     const config = {
       childList: true,
       subtree: true,
     };
     observer.observe(document.body, config);
-
-    // saveNewUsers
   } catch (error) {
     userScriptLogger({
       isError: true, isCritical: true, message: 'initU2N() failed', error,
