@@ -5,6 +5,7 @@ appendCSS(`
     --u2u-nav-item-text: var(--fgColor-muted);
     --u2u-nav-item-text-hover: var(--fgColor-accent);
     --u2u-nav-item-border: var(--borderColor-muted);
+    --u2u-nav-item-radius: 5px;
   }
 
   .u2u-nav {
@@ -20,11 +21,11 @@ appendCSS(`
   }
 
   .u2u-nav > :first-child {
-    border-top-left-radius: 5px;
+    border-top-left-radius: var(--u2u-nav-item-radius);
   }
 
   .u2u-nav > :last-child {
-    border-top-right-radius: 5px;
+    border-top-right-radius: var(--u2u-nav-item-radius);
   }
 
   .u2u-nav-status,
@@ -38,13 +39,31 @@ appendCSS(`
   }
 
   .u2u-nav-status {
-    color: var(--fgColor-default);
-    font-size: 12px;
-    padding: 0 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 10px;
+    padding: 0 10px;
+    margin-right: 10px;
+    border-top-right-radius: var(--u2u-nav-item-radius);
+    border-color: var(--fgColor-success);
+    color: var(--fgColor-default);
+    font-size: 12px;
+    transform: translateY(150px);
+    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
+  }
+
+  @keyframes U2NSlideInFromTop {
+    0% {
+      transform: translateY(150px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .u2u-nav-status + * {
+    border-top-left-radius: var(--u2u-nav-item-radius);
   }
 
   .u2u-nav-status svg {

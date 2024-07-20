@@ -21,9 +21,10 @@ appendCSS(`
   }
 
   .u2n-tag {
-    display: inline-block;
     align-self: center;
-    content: attr(data-u2n-display-name);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -41,10 +42,20 @@ appendCSS(`
     position: relative;
   }
 
+  .u2n-tag svg {
+    display: inline-block;
+    vertical-align: middle;
+    fill: currentColor;
+    height: 10px;
+    width: 10px;
+  }
+
   .u2n-tag img {
     position: absolute;
     left: 0;
     top: 0;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
     height: 100%;
     aspect-ratio: 1 / 1;
   }
@@ -66,7 +77,7 @@ export const renderUsers = () => {
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
 
-    let displayName = user ? user?.username : `? ${username}`;
+    let displayName = user ? user?.username : username;
     if (user?.name) {
       const [firstName, ...rest] = user.name.toLowerCase().split(' ');
 
@@ -96,7 +107,7 @@ export const renderUsers = () => {
 
     const avatarSrc = user?.avatarSrc || '';
 
-    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : ''}<span>${displayName}</span>`;
+    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : IconEye}<span>${displayName}</span>`;
 
     tagsHolderEl.append(tagEl);
 
