@@ -1,3 +1,4 @@
 const rerender = () => {
   renderUsers();
+  renderApp();
 };

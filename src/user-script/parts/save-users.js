@@ -7,10 +7,6 @@ export const getUserFromHovercardIfPossible = () => {
     const username = elHovercard.querySelector('.avatar-user')?.getAttribute('alt')?.replace('@', '').trim();
     const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
 
-    if (!username) {
-      return undefined;
-    }
-
     return {
       id,
       username,
@@ -26,13 +22,6 @@ export const saveNewUsersIfPossible = () => {
   const newUser = getUserFromHovercardIfPossible();
 
   if (newUser) {
-    const wasUpdated = JSON.stringify(window.U2N.usersByUsernames?.[newUser.username])
-      !== JSON.stringify(newUser);
-
-    if (wasUpdated) {
-      saveNewUsers({
-        [newUser.username]: newUser,
-      });
-    }
+    saveNewUser(newUser);
   }
 };

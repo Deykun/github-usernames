@@ -64,13 +64,11 @@ export const renderUsers = () => {
   const elements = getUserElements();
 
   elements.forEach(({ el, username }) => {
-    let displayName = username;
-
     const user = window.U2N.usersByUsernames?.[username];
 
-    const name = user?.name;
-    if (name) {
-      const [firstName, ...rest] = name.toLowerCase().split(' ');
+    let displayName = user ? user?.username : `? ${username}`;
+    if (user?.name) {
+      const [firstName, ...rest] = user.name.toLowerCase().split(' ');
 
       displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
     }
@@ -85,7 +83,13 @@ export const renderUsers = () => {
     el.setAttribute('data-u2n-display-name', displayName);
 
     const tagsHolderEl = document.createElement('span');
-    tagsHolderEl.setAttribute('class', 'u2n-tags-holder u2n-tags--user');
+
+    let holderClassNames = 'u2n-tags-holder u2n-tags--user';
+    if (!user) {
+      holderClassNames += ' u2n-tags--no-data';
+    }
+
+    tagsHolderEl.setAttribute('class', holderClassNames);
 
     const tagEl = document.createElement('span');
     tagEl.setAttribute('class', 'u2n-tag');
