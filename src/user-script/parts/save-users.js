@@ -22,13 +22,6 @@ export const saveNewUsersIfPossible = () => {
   const newUser = getUserFromHovercardIfPossible();
 
   if (newUser) {
-    const wasUpdated = JSON.stringify(window.U2N.usersByUsernames?.[newUser.username])
-      !== JSON.stringify(newUser);
-
-    if (wasUpdated) {
-      saveNewUsers({
-        [newUser.username]: newUser,
-      });
-    }
+    saveNewUser(newUser);
   }
 };
