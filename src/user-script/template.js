@@ -43,6 +43,12 @@ const domReady = (fn) => {
 };
 
 const initU2N = async () => {
+  if (window.U2N.cache.inited) {
+    return;
+  }
+
+  window.U2N.cache.inited = true;
+
   try {
     /* import @/db.js */
     /* import @/dom.js */
@@ -55,6 +61,8 @@ const initU2N = async () => {
 
     saveNewUsersIfPossible();
     rerender();
+
+    /* import @/subscribers.js */
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();

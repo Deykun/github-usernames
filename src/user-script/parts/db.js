@@ -3,7 +3,7 @@ const updateStatus = ({ type = '', text = '' }) => {
     clearTimeout(window.U2N.cache.status);
   }
 
-  window.U2N.status = {
+  window.U2N.ui.status = {
     type,
     text,
   };
@@ -11,7 +11,7 @@ const updateStatus = ({ type = '', text = '' }) => {
   renderApp();
 
   window.U2N.cache.status = setTimeout(() => {
-    window.U2N.status = {
+    window.U2N.ui.status = {
       type: '',
       text: '',
     };

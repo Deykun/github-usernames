@@ -19,14 +19,20 @@ window.U2N = {
   cache: {
     HTML: {},
     CSS: {},
+    inited: false,
     status: null,
   },
+  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
+  actions: {},
+};
+
+window.U2N.ui = {
   status: {
     type: '',
     text: '',
   },
-  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
-  actions: {},
+  openedContent: '',
+  eventsSubscribers: {},
 };
 
 
@@ -58,13 +64,19 @@ const domReady = (fn) => {
 };
 
 const initU2N = async () => {
+  if (window.U2N.cache.inited) {
+    return;
+  }
+
+  window.U2N.cache.inited = true;
+
   try {
     const updateStatus = ({ type = '', text = '' }) => {
   if (window.U2N.cache.status) {
     clearTimeout(window.U2N.cache.status);
   }
 
-  window.U2N.status = {
+  window.U2N.ui.status = {
     type,
     text,
   };
@@ -72,7 +84,7 @@ const initU2N = async () => {
   renderApp();
 
   window.U2N.cache.status = setTimeout(() => {
-    window.U2N.status = {
+    window.U2N.ui.status = {
       type: '',
       text: '',
     };
@@ -220,6 +232,8 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
   :root {
     --u2u-nav-item-size: 35px;
     --u2u-nav-item-bg: var(--bgColor-muted);
+    --u2u-nav-item-bg: var(--bgColor-default);
+    --u2u-nav-item-popup: var(--fgColor-default);
     --u2u-nav-item-text: var(--fgColor-muted);
     --u2u-nav-item-text-hover: var(--fgColor-accent);
     --u2u-nav-item-border: var(--borderColor-muted);
@@ -247,7 +261,7 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
   }
 
   .u2u-nav-status,
-  .u2u-nav-button {
+  .u2u-nav-button-wrapper {
     height: var(--u2u-nav-item-size);
     min-width: var(--u2u-nav-item-size);
     line-height: var(--u2u-nav-item-size);
@@ -291,13 +305,20 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
     width: 14px;
   }
 
+  .u2u-nav-button-wrapper {
+    position: relative;
+  }
+
   .u2u-nav-button {
+    background: transparent;
+    border: none;
     padding: 0;
     color: var(--u2u-nav-item-text);
     width: var(--u2u-nav-item-size);
   }
 
-  .u2u-nav-button:hover {
+  .u2u-nav-button:hover,
+  .u2u-nav-button.u2u-nav-button--active {
     color: var(--u2u-nav-item-text-hover);
   }
 
@@ -308,18 +329,128 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
     width: var(--u2u-nav-item-size);
     line-height: var(--u2u-nav-item-size);
   }
+
+  .u2u-nav-button-content {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    display: flex;
+    flex-flow: column;
+    gap: 15px;
+    width: 200px;
+    line-height: 1.4;
+    text-align: left;
+    padding: 10px;
+    color: var(--u2u-nav-item-popup);
+    border: 1px solid var(--u2u-nav-item-border);
+    border-radius: var(--u2u-nav-item-radius);
+    border-bottom-right-radius: 0;
+    background-color: var(--u2u-nav-item-bg);
+  }
+
+  .u2u-nav-button-content h4 {
+    margin-bottom: 5px;
+  }
+
+  .u2u-nav-button-content ul {
+    list-style: none;
+  }
+
+  .u2u-nav-button-content::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: calc((var(--u2u-nav-item-size) / 2) - 5px);
+    width: 0;
+    height: 0;
+    border: 5px solid transparent;
+    border-top-color: var(--u2u-nav-item-border);
+  }
 `, { sourceName: 'render-app' });
 
 const renderApp = () => {
   const {
     text: statusText = '',
-  } = window.U2N.status;
+  } = window.U2N.ui.status;
 
-  render(`<aside class="u2u-nav">
+  const content = window.U2N.ui.openedContent;
+
+  render(`<aside class="u2u-nav" data-active="${content}">
     ${!statusText ? '' : `<span class="u2u-nav-status">${IconNewUser} <span>${statusText}</span></span>`}
-    <button class="u2u-nav-button">${IconThemes}</button>
-    <button class="u2u-nav-button">${IconCog}</button>
+    <span class="u2u-nav-button-wrapper">
+      
+      ${content !== 'theme'
+    ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
+    <div class="u2u-nav-button-content">
+        <div>
+          <h4>Colors</h4>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="color" value="light" />
+                <span>Light</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="color" value="dark" />
+                <span>Dark</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4>Show avatar</h4>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="avatar" value="1" />
+                <span>Show</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="avatar" value="0" />
+                <span>Hide</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>`}
+    </span>
+    <span class="u2u-nav-button-wrapper">
+    ${content !== 'settings'
+    ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconCog}</button>
+    <div class="u2u-nav-button-content">
+        <div>
+          <p>
+            You can report an issue here: <a href="https://github.com/Deykun/github-usernames-to-names" target="_blank">github.com/Deykun/github-usernames-to-names</a>
+          </p>
+        </div>
+    </div>
+    `}
+    </span>
   </aside>`, 'u2u-app');
+};
+
+window.U2N.ui.eventsSubscribers.content = {
+  selector: '.u2u-nav-button',
+  handleClick: (_, calledByElement) => {
+    if (calledByElement) {
+      const content = calledByElement.getAttribute('data-content');
+      const isClose = !content || content === window.U2N.ui.openedContent;
+
+      if (isClose) {
+        window.U2N.ui.openedContent = '';
+      } else {
+        window.U2N.ui.openedContent = content;
+      }
+    }
+
+    renderApp();
+  },
 };
 
     const getUserElements = () => {
@@ -475,6 +606,39 @@ const saveNewUsersIfPossible = () => {
 
     saveNewUsersIfPossible();
     rerender();
+
+    try {
+  document.body.addEventListener('click', (event) => {
+    const handlerData = Object.values(window.U2N.ui.eventsSubscribers).find(({ selector }) => {
+      /* It checks max 4 nodes, while .closest() would look for all the nodes to body */
+      const matchedHandlerData = [
+        event.target,
+        event.target?.parentElement,
+        event.target?.parentElement?.parentElement,
+        event.target?.parentElement?.parentElement?.parentElement,
+      ].filter(Boolean).find((el) => el.matches(selector));
+
+      return Boolean(matchedHandlerData);
+    });
+
+    if (handlerData) {
+      const { selector, handleClick, shouldPreventDefault = true } = handlerData;
+
+      if (shouldPreventDefault) {
+        event.preventDefault();
+      }
+
+      const calledByElement = event.target.closest(selector);
+
+      handleClick(event, calledByElement);
+    }
+  });
+} catch (error) {
+  userScriptLogger({
+    isError: true, isCritical: true, message: 'Click detect failed', error,
+  });
+}
+
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
