@@ -7,10 +7,6 @@ export const getUserFromHovercardIfPossible = () => {
     const username = elHovercard.querySelector('.avatar-user')?.getAttribute('alt')?.replace('@', '').trim();
     const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
 
-    if (!username) {
-      return undefined;
-    }
-
     return {
       id,
       username,

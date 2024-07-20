@@ -47,6 +47,8 @@ const initU2N = async () => {
     /* import @/db.js */
     /* import @/dom.js */
     /* import @/helpers.js */
+    /* import @/icons.js */
+    /* import @/render-app.js */
     /* import @/render-users.js */
     /* import @/render.js */
     /* import @/save-users.js */

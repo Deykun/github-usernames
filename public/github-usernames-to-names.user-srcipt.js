@@ -21,6 +21,7 @@ window.U2N = {
     CSS: {},
   },
   usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
+  actions: {},
 };
 
 
@@ -77,6 +78,14 @@ const initU2N = async () => {
 
   return true;
 };
+
+const resetUsers = () => {
+  localStorage.removeItem('u2n-users');
+  window.U2N.usersByUsernames = {};
+  renderUsers();
+};
+
+window.U2N.actions.resetUsers = resetUsers;
 
     const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
@@ -144,6 +153,59 @@ const render = (HTML = '', source) => {
 
 const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
 
+    /*
+  https://iconmonstr.com
+*/
+
+const IconUsers = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="M10.644 17.08c2.866-.662 4.539-1.241 3.246-3.682C9.958 5.971 12.848 2 17.001 2c4.235 0 7.054 4.124 3.11 11.398-1.332 2.455.437 3.034 3.242 3.682 2.483.574 2.647 1.787 2.647 3.889V22H8c0-2.745-.22-4.258 2.644-4.92zM-2 22h7.809c-.035-8.177 3.436-5.313 3.436-11.127C9.245 8.362 7.606 7 5.497 7 2.382 7 .215 9.979 3.164 15.549c.969 1.83-1.031 2.265-3.181 2.761C-1.879 18.74-2 19.65-2 21.227V22z"/>
+</svg>`;
+
+    appendCSS(`
+  :root {
+    --u2u-nav-item-size: 25px;
+    --u2u-nav-item-bg: var(--bgColor-muted);
+    --u2u-nav-item-text: var(--fgColor-muted);
+    --u2u-nav-item-text-hover: var(--fgColor-accent);
+    --u2u-nav-item-border: var(--borderColor-muted);
+  }
+
+  .u2u-nav {
+    position: fixed;
+    bottom: 0;
+    right: 30px;
+    height: var(--u2u-nav-item-size);
+  }
+
+  .u2u-nav-item {
+    padding: 0;
+    height: var(--u2u-nav-item-size);
+    width: var(--u2u-nav-item-size);
+    line-height: var(--u2u-nav-item-size);
+    border: 1px solid var(--u2u-nav-item-border);
+    color: var(--u2u-nav-item-text);
+    background: var(--u2u-nav-item-bg);
+  }
+
+  .u2u-nav-item:hover {
+    color: var(--u2u-nav-item-text-hover);
+  }
+
+  .u2u-nav-item svg {
+    fill: currentColor;
+    padding: 20%;
+    height: var(--u2u-nav-item-size);
+    width: var(--u2u-nav-item-size);
+    line-height: var(--u2u-nav-item-size);
+  }
+`, { sourceName: 'render-app' });
+
+const renderApp = () => {
+  render(`<aside class="u2u-nav">
+    <button class="u2u-nav-item">${IconUsers}</button>
+  </aside>`, 'u2u-app');
+};
+
     const getUserElements = () => {
   const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
@@ -210,13 +272,11 @@ const renderUsers = () => {
   const elements = getUserElements();
 
   elements.forEach(({ el, username }) => {
-    let displayName = username;
-
     const user = window.U2N.usersByUsernames?.[username];
 
-    const name = user?.name;
-    if (name) {
-      const [firstName, ...rest] = name.toLowerCase().split(' ');
+    let displayName = user ? user?.username : `? ${username}`;
+    if (user?.name) {
+      const [firstName, ...rest] = user.name.toLowerCase().split(' ');
 
       displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
     }
@@ -231,7 +291,13 @@ const renderUsers = () => {
     el.setAttribute('data-u2n-display-name', displayName);
 
     const tagsHolderEl = document.createElement('span');
-    tagsHolderEl.setAttribute('class', 'u2n-tags-holder u2n-tags--user');
+
+    let holderClassNames = 'u2n-tags-holder u2n-tags--user';
+    if (!user) {
+      holderClassNames += ' u2n-tags--no-data';
+    }
+
+    tagsHolderEl.setAttribute('class', holderClassNames);
 
     const tagEl = document.createElement('span');
     tagEl.setAttribute('class', 'u2n-tag');
@@ -248,6 +314,7 @@ const renderUsers = () => {
 
     const rerender = () => {
   renderUsers();
+  renderApp();
 };
 
     const getUserFromHovercardIfPossible = () => {
@@ -258,10 +325,6 @@ const renderUsers = () => {
     const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
     const username = elHovercard.querySelector('.avatar-user')?.getAttribute('alt')?.replace('@', '').trim();
     const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
-
-    if (!username) {
-      return undefined;
-    }
 
     return {
       id,

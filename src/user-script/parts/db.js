@@ -22,3 +22,11 @@ const saveNewUsers = (usersByNumber = {}) => {
 
   return true;
 };
+
+const resetUsers = () => {
+  localStorage.removeItem('u2n-users');
+  window.U2N.usersByUsernames = {};
+  renderUsers();
+};
+
+window.U2N.actions.resetUsers = resetUsers;
