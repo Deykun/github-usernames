@@ -19,14 +19,20 @@ window.U2N = {
   cache: {
     HTML: {},
     CSS: {},
+    inited: false,
     status: null,
   },
+  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
+  actions: {},
+};
+
+window.U2N.ui = {
   status: {
     type: '',
     text: '',
   },
-  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
-  actions: {},
+  openedContent: '',
+  eventsSubscribers: {},
 };
 
 
@@ -58,13 +64,19 @@ const domReady = (fn) => {
 };
 
 const initU2N = async () => {
+  if (window.U2N.cache.inited) {
+    return;
+  }
+
+  window.U2N.cache.inited = true;
+
   try {
     const updateStatus = ({ type = '', text = '' }) => {
   if (window.U2N.cache.status) {
     clearTimeout(window.U2N.cache.status);
   }
 
-  window.U2N.status = {
+  window.U2N.ui.status = {
     type,
     text,
   };
@@ -72,7 +84,7 @@ const initU2N = async () => {
   renderApp();
 
   window.U2N.cache.status = setTimeout(() => {
-    window.U2N.status = {
+    window.U2N.ui.status = {
       type: '',
       text: '',
     };
@@ -203,24 +215,29 @@ const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0
   https://iconmonstr.com
 */
 
-const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 24 24">
-<path d="M10.5 24h-7C2.1 24 1 22.86 1 21.5V9.86c-.662-.473-1-1.201-1-1.941 0-.376.089-.75.289-1.129 1.065-1.898 2.153-3.783 3.265-5.654C4.016.399 4.765 0 5.599 0c.635 0 .972.204 1.445.479.662.386 9 5.352 12.512 7.441.087.052 3.366 1.988 3.449 2.045.663.49.995 1.197.995 1.934 0 .375-.092.745-.295 1.13-1.064 1.899-2.153 3.784-3.265 5.655-.577.92-1.615 1.29-2.496 1.088-.392.234-5.826 3.75-6.252 3.968-.413.212-.762.26-1.192.26M3 13.237V21.5c0 .274.221.5.5.5h4.588C6.368 19.094 4.671 16.173 3 13.237m1.606-1.238c.053.092 5.681 9.797 5.726 9.859.108.139.299.181.455.098.164-.092 5.081-3.251 5.081-3.251-.639-.377-8.144-4.851-11.262-6.706m.659-9.829C4.352 3.626 2.066 7.695 2.03 7.78c-.07.171-.008.366.149.464.201.12 16.023 9.547 16.177 9.571.151.022.297-.045.377-.174.942-1.584 3.206-5.55 3.232-5.601.069-.172.007-.367-.15-.465-.201-.12-15.983-9.499-16.09-9.546-.18-.074-.365-.002-.46.141m1.557 2.695c1.104 0 2 .897 2 2 0 1.104-.896 2-2 2s-2-.896-2-2c0-1.103.896-2 2-2"/>
+const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="M24 14.187V9.813c-2.148-.766-2.726-.802-3.027-1.529-.303-.729.083-1.169 1.059-3.223l-3.093-3.093c-2.026.963-2.488 1.364-3.224 1.059-.727-.302-.768-.889-1.527-3.027H9.813c-.764 2.144-.8 2.725-1.529 3.027-.752.313-1.203-.1-3.223-1.059L1.968 5.061c.977 2.055 1.362 2.493 1.059 3.224-.302.727-.881.764-3.027 1.528v4.375c2.139.76 2.725.8 3.027 1.528.304.734-.081 1.167-1.059 3.223l3.093 3.093c1.999-.95 2.47-1.373 3.223-1.059.728.302.764.88 1.529 3.027h4.374c.758-2.131.799-2.723 1.537-3.031.745-.308 1.186.099 3.215 1.062l3.093-3.093c-.975-2.05-1.362-2.492-1.059-3.223.3-.726.88-.763 3.027-1.528zm-4.875.764c-.577 1.394-.068 2.458.488 3.578l-1.084 1.084c-1.093-.543-2.161-1.076-3.573-.49-1.396.581-1.79 1.693-2.188 2.877h-1.534c-.398-1.185-.791-2.297-2.183-2.875-1.419-.588-2.507-.045-3.579.488l-1.083-1.084c.557-1.118 1.066-2.18.487-3.58-.579-1.391-1.691-1.784-2.876-2.182v-1.533c1.185-.398 2.297-.791 2.875-2.184.578-1.394.068-2.459-.488-3.579l1.084-1.084c1.082.538 2.162 1.077 3.58.488 1.392-.577 1.785-1.69 2.183-2.875h1.534c.398 1.185.792 2.297 2.184 2.875 1.419.588 2.506.045 3.579-.488l1.084 1.084c-.556 1.121-1.065 2.187-.488 3.58.577 1.391 1.689 1.784 2.875 2.183v1.534c-1.188.398-2.302.791-2.877 2.183zM12 9c1.654 0 3 1.346 3 3s-1.346 3-3 3-3-1.346-3-3 1.346-3 3-3zm0-2c-2.762 0-5 2.238-5 5s2.238 5 5 5 5-2.238 5-5-2.238-5-5-5z"/>
+</svg>`;
+const IconEye = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636C20.118 13.473 16.806 17 12.015 17c-4.42 0-7.93-3.536-9.478-5.407C4.03 9.946 7.354 7 12.015 7zm0-2C4.446 5 0 11.551 0 11.551S4.835 19 12.015 19C19.748 19 24 11.551 24 11.551S19.709 5 12.015 5zM12 8c-2.21 0-4 1.791-4 4s1.79 4 4 4c2.209 0 4-1.791 4-4s-1.791-4-4-4zm-.004 3.999c-.564.564-1.479.564-2.044 0s-.565-1.48 0-2.044c.564-.564 1.479-.564 2.044 0s.565 1.479 0 2.044z"/>
 </svg>`;
 const IconNewUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M9.602 3.7c-1.154 1.937-.635 5.227 1.424 9.025.93 1.712.697 3.02.338 3.815-.982 2.178-3.675 2.799-6.525 3.456C2.875 20.45 3 20.866 3 24H1.005L1 22.759c0-2.52.199-3.975 3.178-4.663 3.365-.777 6.688-1.473 5.09-4.418C4.535 4.949 7.918 0 13 0c3.321 0 5.97 2.117 5.97 6.167 0 3.555-1.949 6.833-2.383 7.833h-2.115c.392-1.536 2.499-4.366 2.499-7.842 0-5.153-5.867-4.985-7.369-2.458zM23 19h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2z"/>
-</svg>
-`;
-const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-<path d="M24 14.187V9.813c-2.148-.766-2.726-.802-3.027-1.529-.303-.729.083-1.169 1.059-3.223l-3.093-3.093c-2.026.963-2.488 1.364-3.224 1.059-.727-.302-.768-.889-1.527-3.027H9.813c-.764 2.144-.8 2.725-1.529 3.027-.752.313-1.203-.1-3.223-1.059L1.968 5.061c.977 2.055 1.362 2.493 1.059 3.224-.302.727-.881.764-3.027 1.528v4.375c2.139.76 2.725.8 3.027 1.528.304.734-.081 1.167-1.059 3.223l3.093 3.093c1.999-.95 2.47-1.373 3.223-1.059.728.302.764.88 1.529 3.027h4.374c.758-2.131.799-2.723 1.537-3.031.745-.308 1.186.099 3.215 1.062l3.093-3.093c-.975-2.05-1.362-2.492-1.059-3.223.3-.726.88-.763 3.027-1.528zm-4.875.764c-.577 1.394-.068 2.458.488 3.578l-1.084 1.084c-1.093-.543-2.161-1.076-3.573-.49-1.396.581-1.79 1.693-2.188 2.877h-1.534c-.398-1.185-.791-2.297-2.183-2.875-1.419-.588-2.507-.045-3.579.488l-1.083-1.084c.557-1.118 1.066-2.18.487-3.58-.579-1.391-1.691-1.784-2.876-2.182v-1.533c1.185-.398 2.297-.791 2.875-2.184.578-1.394.068-2.459-.488-3.579l1.084-1.084c1.082.538 2.162 1.077 3.58.488 1.392-.577 1.785-1.69 2.183-2.875h1.534c.398 1.185.792 2.297 2.184 2.875 1.419.588 2.506.045 3.579-.488l1.084 1.084c-.556 1.121-1.065 2.187-.488 3.58.577 1.391 1.689 1.784 2.875 2.183v1.534c-1.188.398-2.302.791-2.877 2.183zM12 9c1.654 0 3 1.346 3 3s-1.346 3-3 3-3-1.346-3-3 1.346-3 3-3zm0-2c-2.762 0-5 2.238-5 5s2.238 5 5 5 5-2.238 5-5-2.238-5-5-5z"/>
+</svg>`;
+const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 24 24">
+<path d="M10.5 24h-7C2.1 24 1 22.86 1 21.5V9.86c-.662-.473-1-1.201-1-1.941 0-.376.089-.75.289-1.129 1.065-1.898 2.153-3.783 3.265-5.654C4.016.399 4.765 0 5.599 0c.635 0 .972.204 1.445.479.662.386 9 5.352 12.512 7.441.087.052 3.366 1.988 3.449 2.045.663.49.995 1.197.995 1.934 0 .375-.092.745-.295 1.13-1.064 1.899-2.153 3.784-3.265 5.655-.577.92-1.615 1.29-2.496 1.088-.392.234-5.826 3.75-6.252 3.968-.413.212-.762.26-1.192.26M3 13.237V21.5c0 .274.221.5.5.5h4.588C6.368 19.094 4.671 16.173 3 13.237m1.606-1.238c.053.092 5.681 9.797 5.726 9.859.108.139.299.181.455.098.164-.092 5.081-3.251 5.081-3.251-.639-.377-8.144-4.851-11.262-6.706m.659-9.829C4.352 3.626 2.066 7.695 2.03 7.78c-.07.171-.008.366.149.464.201.12 16.023 9.547 16.177 9.571.151.022.297-.045.377-.174.942-1.584 3.206-5.55 3.232-5.601.069-.172.007-.367-.15-.465-.201-.12-15.983-9.499-16.09-9.546-.18-.074-.365-.002-.46.141m1.557 2.695c1.104 0 2 .897 2 2 0 1.104-.896 2-2 2s-2-.896-2-2c0-1.103.896-2 2-2"/>
 </svg>`;
 
     appendCSS(`
   :root {
     --u2u-nav-item-size: 35px;
     --u2u-nav-item-bg: var(--bgColor-muted);
+    --u2u-nav-item-bg: var(--bgColor-default);
+    --u2u-nav-item-popup: var(--fgColor-default);
     --u2u-nav-item-text: var(--fgColor-muted);
     --u2u-nav-item-text-hover: var(--fgColor-accent);
     --u2u-nav-item-border: var(--borderColor-muted);
+    --u2u-nav-item-radius: 5px;
   }
 
   .u2u-nav {
@@ -236,15 +253,15 @@ const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   }
 
   .u2u-nav > :first-child {
-    border-top-left-radius: 5px;
+    border-top-left-radius: var(--u2u-nav-item-radius);
   }
 
   .u2u-nav > :last-child {
-    border-top-right-radius: 5px;
+    border-top-right-radius: var(--u2u-nav-item-radius);
   }
 
   .u2u-nav-status,
-  .u2u-nav-button {
+  .u2u-nav-button-wrapper {
     height: var(--u2u-nav-item-size);
     min-width: var(--u2u-nav-item-size);
     line-height: var(--u2u-nav-item-size);
@@ -254,13 +271,31 @@ const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
   }
 
   .u2u-nav-status {
-    color: var(--fgColor-default);
-    font-size: 12px;
-    padding: 0 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 10px;
+    padding: 0 10px;
+    margin-right: 10px;
+    border-top-right-radius: var(--u2u-nav-item-radius);
+    border-color: var(--fgColor-success);
+    color: var(--fgColor-default);
+    font-size: 12px;
+    transform: translateY(150px);
+    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
+  }
+
+  @keyframes U2NSlideInFromTop {
+    0% {
+      transform: translateY(150px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .u2u-nav-status + * {
+    border-top-left-radius: var(--u2u-nav-item-radius);
   }
 
   .u2u-nav-status svg {
@@ -270,13 +305,20 @@ const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     width: 14px;
   }
 
+  .u2u-nav-button-wrapper {
+    position: relative;
+  }
+
   .u2u-nav-button {
+    background: transparent;
+    border: none;
     padding: 0;
     color: var(--u2u-nav-item-text);
     width: var(--u2u-nav-item-size);
   }
 
-  .u2u-nav-button:hover {
+  .u2u-nav-button:hover,
+  .u2u-nav-button.u2u-nav-button--active {
     color: var(--u2u-nav-item-text-hover);
   }
 
@@ -287,18 +329,128 @@ const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     width: var(--u2u-nav-item-size);
     line-height: var(--u2u-nav-item-size);
   }
+
+  .u2u-nav-button-content {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 10px);
+    display: flex;
+    flex-flow: column;
+    gap: 15px;
+    width: 200px;
+    line-height: 1.4;
+    text-align: left;
+    padding: 10px;
+    color: var(--u2u-nav-item-popup);
+    border: 1px solid var(--u2u-nav-item-border);
+    border-radius: var(--u2u-nav-item-radius);
+    border-bottom-right-radius: 0;
+    background-color: var(--u2u-nav-item-bg);
+  }
+
+  .u2u-nav-button-content h4 {
+    margin-bottom: 5px;
+  }
+
+  .u2u-nav-button-content ul {
+    list-style: none;
+  }
+
+  .u2u-nav-button-content::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: calc((var(--u2u-nav-item-size) / 2) - 5px);
+    width: 0;
+    height: 0;
+    border: 5px solid transparent;
+    border-top-color: var(--u2u-nav-item-border);
+  }
 `, { sourceName: 'render-app' });
 
 const renderApp = () => {
   const {
     text: statusText = '',
-  } = window.U2N.status;
+  } = window.U2N.ui.status;
 
-  render(`<aside class="u2u-nav">
+  const content = window.U2N.ui.openedContent;
+
+  render(`<aside class="u2u-nav" data-active="${content}">
     ${!statusText ? '' : `<span class="u2u-nav-status">${IconNewUser} <span>${statusText}</span></span>`}
-    <button class="u2u-nav-button">${IconThemes}</button>
-    <button class="u2u-nav-button">${IconCog}</button>
+    <span class="u2u-nav-button-wrapper">
+      
+      ${content !== 'theme'
+    ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
+    <div class="u2u-nav-button-content">
+        <div>
+          <h4>Colors</h4>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="color" value="light" />
+                <span>Light</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="color" value="dark" />
+                <span>Dark</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4>Show avatar</h4>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="avatar" value="1" />
+                <span>Show</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="avatar" value="0" />
+                <span>Hide</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>`}
+    </span>
+    <span class="u2u-nav-button-wrapper">
+    ${content !== 'settings'
+    ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconCog}</button>
+    <div class="u2u-nav-button-content">
+        <div>
+          <p>
+            You can report an issue here: <a href="https://github.com/Deykun/github-usernames-to-names" target="_blank">github.com/Deykun/github-usernames-to-names</a>
+          </p>
+        </div>
+    </div>
+    `}
+    </span>
   </aside>`, 'u2u-app');
+};
+
+window.U2N.ui.eventsSubscribers.content = {
+  selector: '.u2u-nav-button',
+  handleClick: (_, calledByElement) => {
+    if (calledByElement) {
+      const content = calledByElement.getAttribute('data-content');
+      const isClose = !content || content === window.U2N.ui.openedContent;
+
+      if (isClose) {
+        window.U2N.ui.openedContent = '';
+      } else {
+        window.U2N.ui.openedContent = content;
+      }
+    }
+
+    renderApp();
+  },
 };
 
     const getUserElements = () => {
@@ -324,9 +476,10 @@ appendCSS(`
   }
 
   .u2n-tag {
-    display: inline-block;
     align-self: center;
-    content: attr(data-u2n-display-name);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     margin-left: 3px;
     padding: 0 6px;
     border-radius: 4px;
@@ -344,10 +497,20 @@ appendCSS(`
     position: relative;
   }
 
+  .u2n-tag svg {
+    display: inline-block;
+    vertical-align: middle;
+    fill: currentColor;
+    height: 10px;
+    width: 10px;
+  }
+
   .u2n-tag img {
     position: absolute;
     left: 0;
     top: 0;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
     height: 100%;
     aspect-ratio: 1 / 1;
   }
@@ -369,7 +532,7 @@ const renderUsers = () => {
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
 
-    let displayName = user ? user?.username : `? ${username}`;
+    let displayName = user ? user?.username : username;
     if (user?.name) {
       const [firstName, ...rest] = user.name.toLowerCase().split(' ');
 
@@ -399,7 +562,7 @@ const renderUsers = () => {
 
     const avatarSrc = user?.avatarSrc || '';
 
-    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : ''}<span>${displayName}</span>`;
+    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : IconEye}<span>${displayName}</span>`;
 
     tagsHolderEl.append(tagEl);
 
@@ -443,6 +606,39 @@ const saveNewUsersIfPossible = () => {
 
     saveNewUsersIfPossible();
     rerender();
+
+    try {
+  document.body.addEventListener('click', (event) => {
+    const handlerData = Object.values(window.U2N.ui.eventsSubscribers).find(({ selector }) => {
+      /* It checks max 4 nodes, while .closest() would look for all the nodes to body */
+      const matchedHandlerData = [
+        event.target,
+        event.target?.parentElement,
+        event.target?.parentElement?.parentElement,
+        event.target?.parentElement?.parentElement?.parentElement,
+      ].filter(Boolean).find((el) => el.matches(selector));
+
+      return Boolean(matchedHandlerData);
+    });
+
+    if (handlerData) {
+      const { selector, handleClick, shouldPreventDefault = true } = handlerData;
+
+      if (shouldPreventDefault) {
+        event.preventDefault();
+      }
+
+      const calledByElement = event.target.closest(selector);
+
+      handleClick(event, calledByElement);
+    }
+  });
+} catch (error) {
+  userScriptLogger({
+    isError: true, isCritical: true, message: 'Click detect failed', error,
+  });
+}
+
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();

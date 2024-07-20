@@ -4,12 +4,18 @@ window.U2N = {
   cache: {
     HTML: {},
     CSS: {},
+    inited: false,
     status: null,
   },
+  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
+  actions: {},
+};
+
+window.U2N.ui = {
   status: {
     type: '',
     text: '',
   },
-  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
-  actions: {},
+  openedContent: '',
+  eventsSubscribers: {},
 };
