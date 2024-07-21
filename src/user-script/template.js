@@ -61,6 +61,7 @@ const initU2N = async () => {
 
     saveNewUsersIfPossible();
     rerender();
+    renderApp();
 
     /* import @/subscribers.js */
 
