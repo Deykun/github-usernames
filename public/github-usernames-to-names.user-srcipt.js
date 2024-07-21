@@ -168,7 +168,7 @@ const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerender if HTML is the same */
+    /* Don't rerenderOnPageChange if HTML is the same */
     return;
   }
 
@@ -574,7 +574,7 @@ const renderUsers = () => {
   });
 };
 
-    const rerender = () => {
+    const rerenderOnPageChange = () => {
   renderUsers();
 };
 
@@ -658,7 +658,7 @@ const saveNewUsersIfPossible = () => {
 
 
     saveNewUsersIfPossible();
-    rerender();
+    rerenderOnPageChange();
     renderApp();
 
     try {
@@ -696,7 +696,7 @@ const saveNewUsersIfPossible = () => {
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerender();
+      rerenderOnPageChange();
     }, 500);
 
     const observer = new MutationObserver(debouncedRefresh);

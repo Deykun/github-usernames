@@ -60,14 +60,14 @@ const initU2N = async () => {
     /* import @/save-users.js */
 
     saveNewUsersIfPossible();
-    rerender();
+    rerenderOnPageChange();
     renderApp();
 
     /* import @/subscribers.js */
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerender();
+      rerenderOnPageChange();
     }, 500);
 
     const observer = new MutationObserver(debouncedRefresh);
