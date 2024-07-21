@@ -17,7 +17,7 @@ const updateStatus = ({ type = '', text = '' }) => {
     };
 
     renderApp();
-  }, 2000);
+  }, 3500);
 };
 
 const saveNewUsers = (usersByNumber = {}, params = {}) => {
@@ -26,7 +26,10 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
     : {};
 
   const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
-    stack[username] = value;
+    const isValidUsername = username && !username.includes(' ');
+    if (isValidUsername) {
+      stack[username] = value;
+    }
 
     return stack;
   }, JSON.parse(JSON.stringify(oldUserByUsernames)));
@@ -42,7 +45,7 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
 
   renderUsers();
   updateStatus({
-    type: 'default',
+    type: 'users-update',
     text: params.customStatusText || "The users' data were updated.",
   });
 
@@ -68,6 +71,8 @@ const resetUsers = () => {
   localStorage.removeItem('u2n-users');
   window.U2N.usersByUsernames = {};
   renderUsers();
+  updateStatus({
+    type: 'users-reset',
+    text: "The users' data were removed.",
+  });
 };
-
-window.U2N.actions.resetUsers = resetUsers;

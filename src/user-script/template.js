@@ -7,8 +7,8 @@
 // @include         https://*github.com*
 // @grant           none
 // @run-at          document-start
-// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/github-usernames-to-names.user-srcipt.js
-// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/github-usernames-to-names.user-srcipt.js
+// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
+// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
 // ==/UserScript==
 
 'use strict';
@@ -21,7 +21,7 @@ const userScriptLogger = (params) => {
 
     if (isCritical) {
       // eslint-disable-next-line no-console
-      console.error('A User2Names error (from Tampermonkey) has occurred. You can ignore it, or describe the error and create an issue here: https://github.com/Deykun/github-usernames-to-names/issues');
+      console.error('A User2Names error (from Tampermonkey) has occurred. You can ignore it, or describe the error and create an issue here: https://github.com/Deykun/github-usernames/issues');
       // eslint-disable-next-line no-console
       console.error(`U2N error: ${message}`);
       // eslint-disable-next-line no-console

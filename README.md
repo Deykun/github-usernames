@@ -4,7 +4,7 @@ Replace the username with the actual name of the user from their profile. This i
 
 ## How to install?
 1. Install https://www.tampermonkey.net/
-2. Go to https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/public/github-usernames-to-names.user-srcipt.js
+2. Go to https://raw.githubusercontent.com/Deykun/github-usernames/main/public/github-usernames.user-srcipt.js
 
 ### Development
 
