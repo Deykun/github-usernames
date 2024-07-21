@@ -76,16 +76,9 @@ export const renderUsers = () => {
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
-
-    let displayName = user ? user?.username : username;
-    if (user?.name) {
-      const [firstName, ...rest] = user.name.toLowerCase().split(' ');
-
-      displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
-    }
+    const displayName = getDisplayNameByUsername(username);
 
     const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
-
     if (isAlreadySet) {
       return;
     }

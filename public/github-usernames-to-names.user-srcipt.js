@@ -212,6 +212,19 @@ const render = (HTML = '', source) => {
 
 const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
 
+const getDisplayNameByUsername = (username) => {
+  const user = window.U2N.usersByUsernames?.[username];
+
+  let displayName = user ? user?.username : username;
+  if (user?.name) {
+    const [firstName, ...rest] = user.name.toLowerCase().split(' ');
+
+    displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+  }
+
+  return displayName;
+};
+
     /*
   https://iconmonstr.com
 */
@@ -305,19 +318,24 @@ const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 
     const getAppUser = ({ isActive = false }) => {
   const isProfilPage = Boolean(document.querySelector('.page-profile'));
+  const username = location.pathname.replace('/', '');
 
-  if (!isProfilPage) {
+  const shouldRender = Boolean(isProfilPage && username);
+  if (!shouldRender) {
     return '';
   }
+
+  const displayName = getDisplayNameByUsername(username);
 
   return `<div class="u2u-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2u-nav-button" data-content="user">${IconUser}</button>`
     : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconUser}</button>
-    <div class="u2u-nav-button-content">
-      <div>
-        Edit user
-      </div>
+      <div class="u2u-nav-button-content">
+        <div>
+          Edit user
+        </div>
+        <input type="text" placeholder="${displayName}" />
       </div>`}
     </div>`;
 };
@@ -574,16 +592,9 @@ const renderUsers = () => {
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
-
-    let displayName = user ? user?.username : username;
-    if (user?.name) {
-      const [firstName, ...rest] = user.name.toLowerCase().split(' ');
-
-      displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
-    }
+    const displayName = getDisplayNameByUsername(username);
 
     const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
-
     if (isAlreadySet) {
       return;
     }
