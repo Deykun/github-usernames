@@ -6,6 +6,7 @@ window.U2N = {
     CSS: {},
     inited: false,
     status: null,
+    location: location.href,
   },
   usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
   actions: {},

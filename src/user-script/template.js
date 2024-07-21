@@ -54,20 +54,31 @@ const initU2N = async () => {
     /* import @/dom.js */
     /* import @/helpers.js */
     /* import @/icons.js */
+    /* import @/render-app-settings.js */
+    /* import @/render-app-status.js */
+    /* import @/render-app-theme.js */
+    /* import @/render-app-user.js */
     /* import @/render-app.js */
     /* import @/render-users.js */
     /* import @/render.js */
     /* import @/save-users.js */
 
     saveNewUsersIfPossible();
-    rerenderOnPageChange();
+    rerenderOnContentChange();
     renderApp();
 
     /* import @/subscribers.js */
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerenderOnPageChange();
+      rerenderOnContentChange();
+
+      const didLocationChange = location.href !== window.U2N.cache.location;
+      if (didLocationChange) {
+        window.U2N.cache.location = location.href;
+
+        rerenderOnLocationChange();
+      }
     }, 500);
 
     const observer = new MutationObserver(debouncedRefresh);
