@@ -578,7 +578,34 @@ const renderUsers = () => {
   renderUsers();
 };
 
-    const getUserFromHovercardIfPossible = () => {
+    const getUserFromUserPageIfPossible = () => {
+  const elProfile = document.querySelector('.page-profile .js-profile-editable-replace');
+
+  if (elProfile) {
+    try {
+      const avatarEl = elProfile.querySelector('.avatar-user');
+      const avatarSrc = avatarEl?.getAttribute('src')?.split('?')[0] || '';
+      const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
+      const username = elProfile.querySelector('.vcard-username')?.textContent?.trim() || '';
+      const name = elProfile.querySelector('.vcard-fullname')?.textContent?.trim() || '';
+
+      return {
+        id,
+        username,
+        avatarSrc,
+        name,
+      };
+    } catch (error) {
+      userScriptLogger({
+        isError: true, message: 'getUserFromUserPageIfPossible() failed while parsing the profile', error,
+      });
+    }
+  }
+
+  return undefined;
+};
+
+const getUserFromHovercardIfPossible = () => {
   const elHovercard = document.querySelector('.user-hovercard-avatar');
 
   if (elHovercard) {
@@ -641,18 +668,23 @@ const getUsersFromPeopleListIfPossible = () => {
 };
 
 const saveNewUsersIfPossible = () => {
-  const newUserFromHoverCard = getUserFromHovercardIfPossible();
-  if (newUserFromHoverCard) {
-    saveNewUser(newUserFromHoverCard);
+  const userFromProfile = getUserFromUserPageIfPossible();
+  if (userFromProfile) {
+    saveNewUser(userFromProfile);
   }
 
-  const newUsersFromPeopleList = getUsersFromPeopleListIfPossible();
-  if (newUsersFromPeopleList.length > 0) {
-    saveNewUsers(newUsersFromPeopleList.reduce((stack, user) => {
+  const userFromHoverCard = getUserFromHovercardIfPossible();
+  if (userFromHoverCard) {
+    saveNewUser(userFromHoverCard);
+  }
+
+  const usersFromPeopleList = getUsersFromPeopleListIfPossible();
+  if (usersFromPeopleList.length > 0) {
+    saveNewUsers(usersFromPeopleList.reduce((stack, user) => {
       stack[user.username] = user;
 
       return stack;
-    }, {}), { customStatusText: `<strong>${newUsersFromPeopleList.length} users'</strong> data were updated` });
+    }, {}), { customStatusText: `<strong>${usersFromPeopleList.length} users'</strong> data were updated` });
   }
 };
 
