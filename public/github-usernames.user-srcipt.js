@@ -119,7 +119,7 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
 
   renderUsers();
   updateStatus({
-    type: 'default',
+    type: 'users-update',
     text: params.customStatusText || "The users' data were updated.",
   });
 
@@ -145,9 +145,11 @@ const resetUsers = () => {
   localStorage.removeItem('u2n-users');
   window.U2N.usersByUsernames = {};
   renderUsers();
+  updateStatus({
+    type: 'users-reset',
+    text: "The users' data were removed.",
+  });
 };
-
-window.U2N.actions.resetUsers = resetUsers;
 
     const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
@@ -250,34 +252,51 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
 const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M20.822 18.096c-3.439-.794-6.641-1.49-5.09-4.418C20.451 4.766 16.983 0 12 0 6.918 0 3.535 4.949 8.268 13.678c1.598 2.945-1.725 3.641-5.09 4.418C.199 18.784 0 20.239 0 22.759L.005 24H2c0-3.134-.125-3.55 1.838-4.003 2.851-.657 5.543-1.278 6.525-3.456.359-.795.592-2.103-.338-3.815C7.967 8.927 7.447 5.637 8.602 3.7c1.354-2.275 5.426-2.264 6.767-.034 1.15 1.911.639 5.219-1.403 9.076-.91 1.719-.671 3.023-.31 3.814.99 2.167 3.707 2.794 6.584 3.458C22.119 20.45 22 20.896 22 24h1.995L24 22.759c0-2.52-.199-3.975-3.178-4.663z"/>
 </svg>`;
+const IconRemoveUsers = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="M23 18h-5v-1h5v1zM7.002 8c-2.494 0-4.227 2.383-1.867 6.839.775 1.464-.826 1.812-2.545 2.209C1.099 17.393 1 18.122 1 19.385l.002.615h1.33c0-1.918-.186-1.385 1.824-1.973 1.014-.295 1.91-.723 2.316-1.612.211-.463.355-1.22-.162-2.197-.953-1.798-1.219-3.374-.713-4.215.547-.909 2.27-.908 2.82.015C9.352 11.585 7.623 14 7.396 15h1.396C9.234 14 10 12.792 10 11.1 10 9.09 8.688 8 7.002 8zm7.754-1.556c.895-1.487 3.609-1.494 4.512.022.77 1.291.422 3.484-.949 6.017-.098.18-.17.351-.232.517h1.463c3.057-5.744.816-9-2.547-9-3.324 0-5.635 3.177-2.488 9.119 1.033 1.952-1.102 2.416-3.395 2.946-1.986.459-2.118 1.429-2.118 3.111l.003.825h1.33c0-2.069-.08-2.367 1.174-2.657 1.918-.442 3.729-.86 4.389-2.305.242-.527.402-1.397-.205-2.543-1.363-2.573-1.705-4.778-.937-6.052z"/>
+</svg>`;
 
     appendCSS(`
-  .u2u-nav-github-link {
+  .u2u-nav-popup-button {
     display: flex;
     gap: 10px;
     justify-content: center;
     align-items: center;
-    padding: 10px 4px;
-    background-color: black;
-    color: white;
+    padding: 8px 4px;
     border-radius: 3px;
-    font-size: 13px;
-    letter-spacing: 0.08em;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    color: var(--bgColor-default);
+    background-color: var(--fgColor-success);
+  }
+
+  .u2u-nav-popup-button:hover {
     text-decoration: none;
   }
 
-  .u2u-nav-github-link:hover {
-    text-decoration: none;
-  }
-
-  .u2u-nav-github-link svg {
+  .u2u-nav-popup-button svg {
     fill: currentColor;
-    width: 16px;
-    height: 16px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .u2u-nav-popup-button--github {
+    color: var(--u2u-nav-item-bg);
+    background-color: var(--u2u-nav-item-text-strong);
+  }
+
+  .u2u-nav-popup-button--danger {
+    color: var(--fgColor-danger);
+    background-color: transparent;
+    border: 1px solid var(--fgColor-danger);
   }
 `, { sourceName: 'render-app-settings' });
 
 const getAppSettings = ({ isActive = false }) => {
+  const totalSavedUsers = Object.values(window.U2N.usersByUsernames).length;
   return `<div class="u2u-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
@@ -285,23 +304,78 @@ const getAppSettings = ({ isActive = false }) => {
       <div class="u2u-nav-popup">
         <div class="u2u-nav-popup-content">
           <h2 class="u2u-nav-popup-title">${IconCog} <span>Settings</span></h2>
-          <p>
-            Users saved: <strong>${Object.values(window.U2N.usersByUsernames).length}</strong>
-          </p>
-          <p>
-            You can report an issue or learn more here:
-          </p>
-          <a class="u2u-nav-github-link" href="https://github.com/Deykun/github-usernames" target="_blank">
-            ${IconGithub}
-            <span>deykun/github-usernames</span>
+          <div>
+            Users saved: <strong>${totalSavedUsers}</strong>
+          </div>
+          ${totalSavedUsers === 0 ? '' : `<button id="u2u-remove-all-users" class="u2u-nav-popup-button u2u-nav-popup-button--danger">
+            ${IconRemoveUsers} <span>remove all saved users</span>
+          </button>`}
+          <br />
+          <div>
+            You can learn more or report an issue here:
+          </div>
+          <a class="u2u-nav-popup-button u2u-nav-popup-button--github" href="https://github.com/Deykun/github-usernames" target="_blank">
+            ${IconGithub} <span>deykun / github-usernames</span>
           </a>
         </div>
       </div>`}
     </div>`;
 };
 
-    const getAppStatus = () => {
+window.U2N.ui.eventsSubscribers.removeAllUsers = {
+  selector: '#u2u-remove-all-users',
+  handleClick: resetUsers,
+};
+
+    appendCSS(`
+  .u2u-nav-status {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 10px;
+    margin-right: 10px;
+    border-top-right-radius: var(--u2u-nav-item-radius);
+    border-color: var(--fgColor-success);
+    color: var(--fgColor-default);
+    font-size: 12px;
+    transform: translateY(150px);
+    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
+  }
+
+  @keyframes U2NSlideInFromTop {
+    0% {
+      transform: translateY(150px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .u2u-nav-status + * {
+    border-top-left-radius: var(--u2u-nav-item-radius);
+  }
+
+  .u2u-nav-status svg {
+    fill: currentColor;
+    color: var(--fgColor-success);
+    height: 14px;
+    width: 14px;
+  }
+
+  .u2u-nav-status--danger svg {
+    color: var(--fgColor-danger);
+  }
+`, { sourceName: 'render-app-status' });
+
+const StatusIconByType = {
+  'users-update': IconNewUser,
+  'users-reset': IconRemoveUsers,
+};
+
+const getAppStatus = () => {
   const {
+    type,
     text: statusText = '',
   } = window.U2N.ui.status;
 
@@ -309,7 +383,12 @@ const getAppSettings = ({ isActive = false }) => {
     return '';
   }
 
-  return `<span class="u2u-nav-status">${IconNewUser} <span>${statusText}</span></span>`;
+  const Icon = StatusIconByType[type] || '';
+  const isNegative = ['users-reset'].includes(type);
+
+  return `<span class="u2u-nav-status ${isNegative ? 'u2u-nav-status--danger' : ''}">
+    ${Icon} <span>${statusText}</span>
+  </span>`;
 };
 
     const getAppTheme = ({ isActive = false }) => {
@@ -455,41 +534,6 @@ const getAppSettings = ({ isActive = false }) => {
     background: var(--u2u-nav-item-bg);
   }
 
-  .u2u-nav-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 0 10px;
-    margin-right: 10px;
-    border-top-right-radius: var(--u2u-nav-item-radius);
-    border-color: var(--fgColor-success);
-    color: var(--fgColor-default);
-    font-size: 12px;
-    transform: translateY(150px);
-    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
-  }
-
-  @keyframes U2NSlideInFromTop {
-    0% {
-      transform: translateY(150px);
-    }
-    100% {
-      transform: translateY(0);
-    }
-  }
-
-  .u2u-nav-status + * {
-    border-top-left-radius: var(--u2u-nav-item-radius);
-  }
-
-  .u2u-nav-status svg {
-    fill: currentColor;
-    color: var(--fgColor-success);
-    height: 14px;
-    width: 14px;
-  }
-
   .u2u-nav-button-wrapper {
     position: relative;
   }
@@ -523,7 +567,7 @@ const getAppSettings = ({ isActive = false }) => {
     position: absolute;
     right: 0;
     bottom: calc(100% + 10px);
-    width: 250px;
+    width: 300px;
     color: var(--u2u-nav-item-text-strong);
     border: 1px solid var(--u2u-nav-item-border);
     border-radius: var(--u2u-nav-item-radius);

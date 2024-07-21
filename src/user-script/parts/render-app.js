@@ -41,41 +41,6 @@ appendCSS(`
     background: var(--u2u-nav-item-bg);
   }
 
-  .u2u-nav-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 0 10px;
-    margin-right: 10px;
-    border-top-right-radius: var(--u2u-nav-item-radius);
-    border-color: var(--fgColor-success);
-    color: var(--fgColor-default);
-    font-size: 12px;
-    transform: translateY(150px);
-    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
-  }
-
-  @keyframes U2NSlideInFromTop {
-    0% {
-      transform: translateY(150px);
-    }
-    100% {
-      transform: translateY(0);
-    }
-  }
-
-  .u2u-nav-status + * {
-    border-top-left-radius: var(--u2u-nav-item-radius);
-  }
-
-  .u2u-nav-status svg {
-    fill: currentColor;
-    color: var(--fgColor-success);
-    height: 14px;
-    width: 14px;
-  }
-
   .u2u-nav-button-wrapper {
     position: relative;
   }
@@ -109,7 +74,7 @@ appendCSS(`
     position: absolute;
     right: 0;
     bottom: calc(100% + 10px);
-    width: 250px;
+    width: 300px;
     color: var(--u2u-nav-item-text-strong);
     border: 1px solid var(--u2u-nav-item-border);
     border-radius: var(--u2u-nav-item-radius);

@@ -45,7 +45,7 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
 
   renderUsers();
   updateStatus({
-    type: 'default',
+    type: 'users-update',
     text: params.customStatusText || "The users' data were updated.",
   });
 
@@ -71,6 +71,8 @@ const resetUsers = () => {
   localStorage.removeItem('u2n-users');
   window.U2N.usersByUsernames = {};
   renderUsers();
+  updateStatus({
+    type: 'users-reset',
+    text: "The users' data were removed.",
+  });
 };
-
-window.U2N.actions.resetUsers = resetUsers;
