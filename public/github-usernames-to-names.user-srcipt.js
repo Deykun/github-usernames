@@ -21,6 +21,7 @@ window.U2N = {
     CSS: {},
     inited: false,
     status: null,
+    location: location.href,
   },
   usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
   actions: {},
@@ -168,7 +169,7 @@ const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerenderOnPageChange if HTML is the same */
+    /* Don't rerenderOnContentChange if HTML is the same */
     return;
   }
 
@@ -211,6 +212,19 @@ const render = (HTML = '', source) => {
 
 const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
 
+const getDisplayNameByUsername = (username) => {
+  const user = window.U2N.usersByUsernames?.[username];
+
+  let displayName = user ? user?.username : username;
+  if (user?.name) {
+    const [firstName, ...rest] = user.name.toLowerCase().split(' ');
+
+    displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+  }
+
+  return displayName;
+};
+
     /*
   https://iconmonstr.com
 */
@@ -227,6 +241,104 @@ const IconNewUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
 const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 24 24">
 <path d="M10.5 24h-7C2.1 24 1 22.86 1 21.5V9.86c-.662-.473-1-1.201-1-1.941 0-.376.089-.75.289-1.129 1.065-1.898 2.153-3.783 3.265-5.654C4.016.399 4.765 0 5.599 0c.635 0 .972.204 1.445.479.662.386 9 5.352 12.512 7.441.087.052 3.366 1.988 3.449 2.045.663.49.995 1.197.995 1.934 0 .375-.092.745-.295 1.13-1.064 1.899-2.153 3.784-3.265 5.655-.577.92-1.615 1.29-2.496 1.088-.392.234-5.826 3.75-6.252 3.968-.413.212-.762.26-1.192.26M3 13.237V21.5c0 .274.221.5.5.5h4.588C6.368 19.094 4.671 16.173 3 13.237m1.606-1.238c.053.092 5.681 9.797 5.726 9.859.108.139.299.181.455.098.164-.092 5.081-3.251 5.081-3.251-.639-.377-8.144-4.851-11.262-6.706m.659-9.829C4.352 3.626 2.066 7.695 2.03 7.78c-.07.171-.008.366.149.464.201.12 16.023 9.547 16.177 9.571.151.022.297-.045.377-.174.942-1.584 3.206-5.55 3.232-5.601.069-.172.007-.367-.15-.465-.201-.12-15.983-9.499-16.09-9.546-.18-.074-.365-.002-.46.141m1.557 2.695c1.104 0 2 .897 2 2 0 1.104-.896 2-2 2s-2-.896-2-2c0-1.103.896-2 2-2"/>
 </svg>`;
+const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="M20.822 18.096c-3.439-.794-6.641-1.49-5.09-4.418C20.451 4.766 16.983 0 12 0 6.918 0 3.535 4.949 8.268 13.678c1.598 2.945-1.725 3.641-5.09 4.418C.199 18.784 0 20.239 0 22.759L.005 24H2c0-3.134-.125-3.55 1.838-4.003 2.851-.657 5.543-1.278 6.525-3.456.359-.795.592-2.103-.338-3.815C7.967 8.927 7.447 5.637 8.602 3.7c1.354-2.275 5.426-2.264 6.767-.034 1.15 1.911.639 5.219-1.403 9.076-.91 1.719-.671 3.023-.31 3.814.99 2.167 3.707 2.794 6.584 3.458C22.119 20.45 22 20.896 22 24h1.995L24 22.759c0-2.52-.199-3.975-3.178-4.663z"/>
+</svg>`;
+
+    const getAppSettings = ({ isActive = false }) => {
+  return `<div class="u2u-nav-button-wrapper">
+      ${!isActive
+    ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconCog}</button>
+    <div class="u2u-nav-button-content">
+      <div>
+        <p>
+          You can report an issue here: <a href="https://github.com/Deykun/github-usernames-to-names" target="_blank">github.com/Deykun/github-usernames-to-names</a>
+        </p>
+      </div>
+      </div>`}
+    </div>`;
+};
+
+    const getAppStatus = () => {
+  const {
+    text: statusText = '',
+  } = window.U2N.ui.status;
+
+  if (!statusText) {
+    return '';
+  }
+
+  return `<span class="u2u-nav-status">${IconNewUser} <span>${statusText}</span></span>`;
+};
+
+    const getAppTheme = ({ isActive = false }) => {
+  return `<div class="u2u-nav-button-wrapper">
+      ${!isActive
+    ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
+    <div class="u2u-nav-button-content">
+        <div>
+          <h4>Colors</h4>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="color" value="light" />
+                <span>Light</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="color" value="dark" />
+                <span>Dark</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+        <div>
+          <h4>Show avatar</h4>
+          <ul>
+            <li>
+              <label>
+                <input type="radio" name="avatar" value="1" />
+                <span>Show</span>
+              </label>
+            </li>
+            <li>
+              <label>
+                <input type="radio" name="avatar" value="0" />
+                <span>Hide</span>
+              </label>
+            </li>
+          </ul>
+        </div>
+      </div>`}
+    </div>`;
+};
+
+    const getAppUser = ({ isActive = false }) => {
+  const isProfilPage = Boolean(document.querySelector('.page-profile'));
+  const username = location.pathname.replace('/', '');
+
+  const shouldRender = Boolean(isProfilPage && username);
+  if (!shouldRender) {
+    return '';
+  }
+
+  const displayName = getDisplayNameByUsername(username);
+
+  return `<div class="u2u-nav-button-wrapper">
+      ${!isActive
+    ? `<button class="u2u-nav-button" data-content="user">${IconUser}</button>`
+    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconUser}</button>
+      <div class="u2u-nav-button-content">
+        <div>
+          Edit user
+        </div>
+        <input type="text" placeholder="${displayName}" />
+      </div>`}
+    </div>`;
+};
 
     appendCSS(`
   :root {
@@ -316,6 +428,7 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
     padding: 0;
     color: var(--u2u-nav-item-text);
     width: var(--u2u-nav-item-size);
+    transition: 0.3s ease-in-out;
   }
 
   .u2u-nav-button:hover {
@@ -373,69 +486,13 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
 `, { sourceName: 'render-app' });
 
 const renderApp = () => {
-  const {
-    text: statusText = '',
-  } = window.U2N.ui.status;
-
   const content = window.U2N.ui.openedContent;
 
   render(`<aside class="u2u-nav" data-active="${content}">
-    ${!statusText ? '' : `<span class="u2u-nav-status">${IconNewUser} <span>${statusText}</span></span>`}
-    <span class="u2u-nav-button-wrapper">
-      
-      ${content !== 'theme'
-    ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
-    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
-    <div class="u2u-nav-button-content">
-        <div>
-          <h4>Colors</h4>
-          <ul>
-            <li>
-              <label>
-                <input type="radio" name="color" value="light" />
-                <span>Light</span>
-              </label>
-            </li>
-            <li>
-              <label>
-                <input type="radio" name="color" value="dark" />
-                <span>Dark</span>
-              </label>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h4>Show avatar</h4>
-          <ul>
-            <li>
-              <label>
-                <input type="radio" name="avatar" value="1" />
-                <span>Show</span>
-              </label>
-            </li>
-            <li>
-              <label>
-                <input type="radio" name="avatar" value="0" />
-                <span>Hide</span>
-              </label>
-            </li>
-          </ul>
-        </div>
-      </div>`}
-    </span>
-    <span class="u2u-nav-button-wrapper">
-    ${content !== 'settings'
-    ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
-    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconCog}</button>
-    <div class="u2u-nav-button-content">
-        <div>
-          <p>
-            You can report an issue here: <a href="https://github.com/Deykun/github-usernames-to-names" target="_blank">github.com/Deykun/github-usernames-to-names</a>
-          </p>
-        </div>
-    </div>
-    `}
-    </span>
+    ${getAppStatus()}
+    ${getAppUser({ isActive: content === 'user' })}
+    ${getAppTheme({ isActive: content === 'theme' })}
+    ${getAppSettings({ isActive: content === 'settings' })}
   </aside>`, 'u2u-app');
 };
 
@@ -535,16 +592,9 @@ const renderUsers = () => {
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
-
-    let displayName = user ? user?.username : username;
-    if (user?.name) {
-      const [firstName, ...rest] = user.name.toLowerCase().split(' ');
-
-      displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
-    }
+    const displayName = getDisplayNameByUsername(username);
 
     const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
-
     if (isAlreadySet) {
       return;
     }
@@ -574,11 +624,42 @@ const renderUsers = () => {
   });
 };
 
-    const rerenderOnPageChange = () => {
+    const rerenderOnContentChange = () => {
   renderUsers();
 };
 
-    const getUserFromHovercardIfPossible = () => {
+const rerenderOnLocationChange = () => {
+  renderApp();
+};
+
+    const getUserFromUserPageIfPossible = () => {
+  const elProfile = document.querySelector('.page-profile .js-profile-editable-replace');
+
+  if (elProfile) {
+    try {
+      const avatarEl = elProfile.querySelector('.avatar-user');
+      const avatarSrc = avatarEl?.getAttribute('src')?.split('?')[0] || '';
+      const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
+      const username = elProfile.querySelector('.vcard-username')?.textContent?.trim() || '';
+      const name = elProfile.querySelector('.vcard-fullname')?.textContent?.trim() || '';
+
+      return {
+        id,
+        username,
+        avatarSrc,
+        name,
+      };
+    } catch (error) {
+      userScriptLogger({
+        isError: true, message: 'getUserFromUserPageIfPossible() failed while parsing the profile', error,
+      });
+    }
+  }
+
+  return undefined;
+};
+
+const getUserFromHovercardIfPossible = () => {
   const elHovercard = document.querySelector('.user-hovercard-avatar');
 
   if (elHovercard) {
@@ -641,24 +722,29 @@ const getUsersFromPeopleListIfPossible = () => {
 };
 
 const saveNewUsersIfPossible = () => {
-  const newUserFromHoverCard = getUserFromHovercardIfPossible();
-  if (newUserFromHoverCard) {
-    saveNewUser(newUserFromHoverCard);
+  const userFromProfile = getUserFromUserPageIfPossible();
+  if (userFromProfile) {
+    saveNewUser(userFromProfile);
   }
 
-  const newUsersFromPeopleList = getUsersFromPeopleListIfPossible();
-  if (newUsersFromPeopleList.length > 0) {
-    saveNewUsers(newUsersFromPeopleList.reduce((stack, user) => {
+  const userFromHoverCard = getUserFromHovercardIfPossible();
+  if (userFromHoverCard) {
+    saveNewUser(userFromHoverCard);
+  }
+
+  const usersFromPeopleList = getUsersFromPeopleListIfPossible();
+  if (usersFromPeopleList.length > 0) {
+    saveNewUsers(usersFromPeopleList.reduce((stack, user) => {
       stack[user.username] = user;
 
       return stack;
-    }, {}), { customStatusText: `<strong>${newUsersFromPeopleList.length} users'</strong> data were updated` });
+    }, {}), { customStatusText: `<strong>${usersFromPeopleList.length} users'</strong> data were updated` });
   }
 };
 
 
     saveNewUsersIfPossible();
-    rerenderOnPageChange();
+    rerenderOnContentChange();
     renderApp();
 
     try {
@@ -696,7 +782,14 @@ const saveNewUsersIfPossible = () => {
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerenderOnPageChange();
+      rerenderOnContentChange();
+
+      const didLocationChange = location.href !== window.U2N.cache.location;
+      if (didLocationChange) {
+        window.U2N.cache.location = location.href;
+
+        rerenderOnLocationChange();
+      }
     }, 500);
 
     const observer = new MutationObserver(debouncedRefresh);

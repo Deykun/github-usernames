@@ -86,6 +86,7 @@ appendCSS(`
     padding: 0;
     color: var(--u2u-nav-item-text);
     width: var(--u2u-nav-item-size);
+    transition: 0.3s ease-in-out;
   }
 
   .u2u-nav-button:hover {
@@ -143,69 +144,13 @@ appendCSS(`
 `, { sourceName: 'render-app' });
 
 export const renderApp = () => {
-  const {
-    text: statusText = '',
-  } = window.U2N.ui.status;
-
   const content = window.U2N.ui.openedContent;
 
   render(`<aside class="u2u-nav" data-active="${content}">
-    ${!statusText ? '' : `<span class="u2u-nav-status">${IconNewUser} <span>${statusText}</span></span>`}
-    <span class="u2u-nav-button-wrapper">
-      
-      ${content !== 'theme'
-    ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
-    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
-    <div class="u2u-nav-button-content">
-        <div>
-          <h4>Colors</h4>
-          <ul>
-            <li>
-              <label>
-                <input type="radio" name="color" value="light" />
-                <span>Light</span>
-              </label>
-            </li>
-            <li>
-              <label>
-                <input type="radio" name="color" value="dark" />
-                <span>Dark</span>
-              </label>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h4>Show avatar</h4>
-          <ul>
-            <li>
-              <label>
-                <input type="radio" name="avatar" value="1" />
-                <span>Show</span>
-              </label>
-            </li>
-            <li>
-              <label>
-                <input type="radio" name="avatar" value="0" />
-                <span>Hide</span>
-              </label>
-            </li>
-          </ul>
-        </div>
-      </div>`}
-    </span>
-    <span class="u2u-nav-button-wrapper">
-    ${content !== 'settings'
-    ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
-    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconCog}</button>
-    <div class="u2u-nav-button-content">
-        <div>
-          <p>
-            You can report an issue here: <a href="https://github.com/Deykun/github-usernames-to-names" target="_blank">github.com/Deykun/github-usernames-to-names</a>
-          </p>
-        </div>
-    </div>
-    `}
-    </span>
+    ${getAppStatus()}
+    ${getAppUser({ isActive: content === 'user' })}
+    ${getAppTheme({ isActive: content === 'theme' })}
+    ${getAppSettings({ isActive: content === 'settings' })}
   </aside>`, 'u2u-app');
 };
 
