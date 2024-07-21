@@ -1,4 +1,3 @@
-const rerender = () => {
+const rerenderOnPageChange = () => {
   renderUsers();
-  renderApp();
 };

@@ -116,7 +116,7 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
   renderUsers();
   updateStatus({
     type: 'default',
-    text: params.customStatusText || 'New users data was added',
+    text: params.customStatusText || "The users' data were updated.",
   });
 
   return true;
@@ -130,7 +130,7 @@ const saveNewUser = (newUser) => {
     if (wasUpdated) {
       return saveNewUsers({
         [newUser.username]: newUser,
-      }, { customStatusText: `<strong>${newUser.username}</strong>'s data was added` });
+      }, { customStatusText: `<strong>${newUser.username}</strong>'s data was updated.` });
     }
   }
 
@@ -168,7 +168,7 @@ const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerender if HTML is the same */
+    /* Don't rerenderOnPageChange if HTML is the same */
     return;
   }
 
@@ -233,7 +233,7 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
     --u2u-nav-item-size: 35px;
     --u2u-nav-item-bg: var(--bgColor-muted);
     --u2u-nav-item-bg: var(--bgColor-default);
-    --u2u-nav-item-popup: var(--fgColor-default);
+    --u2u-nav-item-text-strong: var(--fgColor-default);
     --u2u-nav-item-text: var(--fgColor-muted);
     --u2u-nav-item-text-hover: var(--fgColor-accent);
     --u2u-nav-item-border: var(--borderColor-muted);
@@ -241,11 +241,12 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
   }
 
   .u2u-nav {
+    display: flex;
     position: fixed;
     bottom: 0;
     right: 30px;
     height: var(--u2u-nav-item-size);
-    display: flex;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.06));
   }
 
   .u2u-nav > * + * {
@@ -317,9 +318,12 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
     width: var(--u2u-nav-item-size);
   }
 
-  .u2u-nav-button:hover,
-  .u2u-nav-button.u2u-nav-button--active {
+  .u2u-nav-button:hover {
     color: var(--u2u-nav-item-text-hover);
+  }
+
+  .u2u-nav-button--active {
+    color: var(--u2u-nav-item-text-strong);
   }
 
   .u2u-nav-button svg {
@@ -341,7 +345,7 @@ const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" 
     line-height: 1.4;
     text-align: left;
     padding: 10px;
-    color: var(--u2u-nav-item-popup);
+    color: var(--u2u-nav-item-text-strong);
     border: 1px solid var(--u2u-nav-item-border);
     border-radius: var(--u2u-nav-item-radius);
     border-bottom-right-radius: 0;
@@ -570,42 +574,92 @@ const renderUsers = () => {
   });
 };
 
-    const rerender = () => {
+    const rerenderOnPageChange = () => {
   renderUsers();
-  renderApp();
 };
 
     const getUserFromHovercardIfPossible = () => {
   const elHovercard = document.querySelector('.user-hovercard-avatar');
 
   if (elHovercard) {
-    const avatarSrc = elHovercard.querySelector('.avatar-user')?.getAttribute('src')?.split('?')[0] || '';
-    const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
-    const username = elHovercard.querySelector('.avatar-user')?.getAttribute('alt')?.replace('@', '').trim();
-    const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
+    try {
+      const avatarEl = elHovercard.querySelector('.avatar-user');
+      const avatarSrc = avatarEl?.getAttribute('src')?.split('?')[0] || '';
+      const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
+      const username = avatarEl?.getAttribute('alt')?.replace('@', '').trim();
+      const name = elHovercard.parentNode.parentNode.querySelector(`.Link--secondary[href="/${username}"]`)?.textContent?.trim() || '';
 
-    return {
-      id,
-      username,
-      avatarSrc,
-      name,
-    };
+      return {
+        id,
+        username,
+        avatarSrc,
+        name,
+      };
+    } catch (error) {
+      userScriptLogger({
+        isError: true, message: 'getUserFromHovercardIfPossible() failed while parsing the card', error,
+      });
+    }
   }
 
   return undefined;
 };
 
-const saveNewUsersIfPossible = () => {
-  const newUser = getUserFromHovercardIfPossible();
+const getUsersFromPeopleListIfPossible = () => {
+  if (!location.pathname.includes('/people')) {
+    return [];
+  }
 
-  if (newUser) {
-    saveNewUser(newUser);
+  try {
+    const usersEls = Array.from(document.querySelectorAll('li[data-bulk-actions-id]'));
+
+    const users = usersEls.map((el) => {
+      const avatarEl = el.querySelector('.avatar-user');
+      const avatarSrc = avatarEl?.getAttribute('src')?.split('?')[0] || '';
+      const id = avatarSrc ? avatarSrc.match(/u\/([0-9]+)?/)[1] : '';
+      const username = avatarEl?.getAttribute('alt')?.replace('@', '').trim();
+      const name = Array.from(
+        el.querySelector('[data-test-selector="linked-name-is-full-if-exists"]').childNodes,
+      ).find((child) => child.nodeType === Node.TEXT_NODE).textContent.trim();
+
+      return {
+        id,
+        username,
+        avatarSrc,
+        name,
+      };
+    });
+
+    return users;
+  } catch (error) {
+    userScriptLogger({
+      isError: true, message: 'getUsersFromPeopleListIfPossible() failed while parsing the people list', error,
+    });
+  }
+
+  return [];
+};
+
+const saveNewUsersIfPossible = () => {
+  const newUserFromHoverCard = getUserFromHovercardIfPossible();
+  if (newUserFromHoverCard) {
+    saveNewUser(newUserFromHoverCard);
+  }
+
+  const newUsersFromPeopleList = getUsersFromPeopleListIfPossible();
+  if (newUsersFromPeopleList.length > 0) {
+    saveNewUsers(newUsersFromPeopleList.reduce((stack, user) => {
+      stack[user.username] = user;
+
+      return stack;
+    }, {}), { customStatusText: `<strong>${newUsersFromPeopleList.length} users'</strong> data were updated` });
   }
 };
 
 
     saveNewUsersIfPossible();
-    rerender();
+    rerenderOnPageChange();
+    renderApp();
 
     try {
   document.body.addEventListener('click', (event) => {
@@ -642,7 +696,7 @@ const saveNewUsersIfPossible = () => {
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerender();
+      rerenderOnPageChange();
     }, 500);
 
     const observer = new MutationObserver(debouncedRefresh);

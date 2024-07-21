@@ -3,7 +3,7 @@ appendCSS(`
     --u2u-nav-item-size: 35px;
     --u2u-nav-item-bg: var(--bgColor-muted);
     --u2u-nav-item-bg: var(--bgColor-default);
-    --u2u-nav-item-popup: var(--fgColor-default);
+    --u2u-nav-item-text-strong: var(--fgColor-default);
     --u2u-nav-item-text: var(--fgColor-muted);
     --u2u-nav-item-text-hover: var(--fgColor-accent);
     --u2u-nav-item-border: var(--borderColor-muted);
@@ -11,11 +11,12 @@ appendCSS(`
   }
 
   .u2u-nav {
+    display: flex;
     position: fixed;
     bottom: 0;
     right: 30px;
     height: var(--u2u-nav-item-size);
-    display: flex;
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.06));
   }
 
   .u2u-nav > * + * {
@@ -87,9 +88,12 @@ appendCSS(`
     width: var(--u2u-nav-item-size);
   }
 
-  .u2u-nav-button:hover,
-  .u2u-nav-button.u2u-nav-button--active {
+  .u2u-nav-button:hover {
     color: var(--u2u-nav-item-text-hover);
+  }
+
+  .u2u-nav-button--active {
+    color: var(--u2u-nav-item-text-strong);
   }
 
   .u2u-nav-button svg {
@@ -111,7 +115,7 @@ appendCSS(`
     line-height: 1.4;
     text-align: left;
     padding: 10px;
-    color: var(--u2u-nav-item-popup);
+    color: var(--u2u-nav-item-text-strong);
     border: 1px solid var(--u2u-nav-item-border);
     border-radius: var(--u2u-nav-item-radius);
     border-bottom-right-radius: 0;

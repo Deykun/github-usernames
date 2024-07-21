@@ -43,7 +43,7 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
   renderUsers();
   updateStatus({
     type: 'default',
-    text: params.customStatusText || 'New users data was added',
+    text: params.customStatusText || "The users' data were updated.",
   });
 
   return true;
@@ -57,7 +57,7 @@ const saveNewUser = (newUser) => {
     if (wasUpdated) {
       return saveNewUsers({
         [newUser.username]: newUser,
-      }, { customStatusText: `<strong>${newUser.username}</strong>'s data was added` });
+      }, { customStatusText: `<strong>${newUser.username}</strong>'s data was updated.` });
     }
   }
 

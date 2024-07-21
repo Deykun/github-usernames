@@ -21,7 +21,7 @@ export const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerender if HTML is the same */
+    /* Don't rerenderOnPageChange if HTML is the same */
     return;
   }
 
