@@ -140,6 +140,32 @@ appendCSS(`
     border: 5px solid transparent;
     border-top-color: var(--u2u-nav-item-border);
   }
+
+  .u2u-nav-popup-button {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 3px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    color: var(--bgColor-default);
+    background-color: var(--fgColor-success);
+  }
+
+  .u2u-nav-popup-button:hover {
+    text-decoration: none;
+  }
+
+  .u2u-nav-popup-button svg {
+    fill: currentColor;
+    width: 18px;
+    height: 18px;
+  }
 `, { sourceName: 'render-app' });
 
 export const renderApp = () => {

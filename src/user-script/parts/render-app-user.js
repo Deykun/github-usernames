@@ -17,6 +17,9 @@ export const getAppUser = ({ isActive = false }) => {
         <div class="u2u-nav-popup-content">
           <h2 class="u2u-nav-popup-title">${IconUser} <span>Edit user label</span></h2>
           <input type="text" placeholder="${displayName}" />
+          <button class="u2u-nav-popup-button">
+            ${IconSave} <span>save</span>
+          </button>
         </div>
       </div>`}
     </div>`;

@@ -17,7 +17,7 @@ const updateStatus = ({ type = '', text = '' }) => {
     };
 
     renderApp();
-  }, 2000);
+  }, 3500);
 };
 
 const saveNewUsers = (usersByNumber = {}, params = {}) => {

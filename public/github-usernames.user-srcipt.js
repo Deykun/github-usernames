@@ -91,7 +91,7 @@ const initU2N = async () => {
     };
 
     renderApp();
-  }, 2000);
+  }, 3500);
 };
 
 const saveNewUsers = (usersByNumber = {}, params = {}) => {
@@ -246,6 +246,9 @@ const IconGithub = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 const IconNewUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M9.602 3.7c-1.154 1.937-.635 5.227 1.424 9.025.93 1.712.697 3.02.338 3.815-.982 2.178-3.675 2.799-6.525 3.456C2.875 20.45 3 20.866 3 24H1.005L1 22.759c0-2.52.199-3.975 3.178-4.663 3.365-.777 6.688-1.473 5.09-4.418C4.535 4.949 7.918 0 13 0c3.321 0 5.97 2.117 5.97 6.167 0 3.555-1.949 6.833-2.383 7.833h-2.115c.392-1.536 2.499-4.366 2.499-7.842 0-5.153-5.867-4.985-7.369-2.458zM23 19h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2z"/>
 </svg>`;
+const IconSave = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="m0 12 11 3.1L18 7l-8.156 5.672-4.312-1.202 15.362-7.68-3.974 14.57-3.75-3.339L11 17.946v-.769l-2-.56V24l4.473-6.031L18 22l6-22z"/>
+</svg>`;
 const IconThemes = `<svg xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" viewBox="0 0 24 24">
 <path d="M10.5 24h-7C2.1 24 1 22.86 1 21.5V9.86c-.662-.473-1-1.201-1-1.941 0-.376.089-.75.289-1.129 1.065-1.898 2.153-3.783 3.265-5.654C4.016.399 4.765 0 5.599 0c.635 0 .972.204 1.445.479.662.386 9 5.352 12.512 7.441.087.052 3.366 1.988 3.449 2.045.663.49.995 1.197.995 1.934 0 .375-.092.745-.295 1.13-1.064 1.899-2.153 3.784-3.265 5.655-.577.92-1.615 1.29-2.496 1.088-.392.234-5.826 3.75-6.252 3.968-.413.212-.762.26-1.192.26M3 13.237V21.5c0 .274.221.5.5.5h4.588C6.368 19.094 4.671 16.173 3 13.237m1.606-1.238c.053.092 5.681 9.797 5.726 9.859.108.139.299.181.455.098.164-.092 5.081-3.251 5.081-3.251-.639-.377-8.144-4.851-11.262-6.706m.659-9.829C4.352 3.626 2.066 7.695 2.03 7.78c-.07.171-.008.366.149.464.201.12 16.023 9.547 16.177 9.571.151.022.297-.045.377-.174.942-1.584 3.206-5.55 3.232-5.601.069-.172.007-.367-.15-.465-.201-.12-15.983-9.499-16.09-9.546-.18-.074-.365-.002-.46.141m1.557 2.695c1.104 0 2 .897 2 2 0 1.104-.896 2-2 2s-2-.896-2-2c0-1.103.896-2 2-2"/>
 </svg>`;
@@ -257,41 +260,18 @@ const IconRemoveUsers = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24
 </svg>`;
 
     appendCSS(`
-  .u2u-nav-popup-button {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 4px;
-    border-radius: 3px;
-    font-size: 14px;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-    background: none;
-    border: none;
-    color: var(--bgColor-default);
-    background-color: var(--fgColor-success);
-  }
-
-  .u2u-nav-popup-button:hover {
-    text-decoration: none;
-  }
-
-  .u2u-nav-popup-button svg {
-    fill: currentColor;
-    width: 26px;
-    height: 26px;
-  }
-
-  .u2u-nav-popup-button--github {
+  .u2u-nav-popup-button.u2u-nav-popup-button--github {
     color: var(--u2u-nav-item-bg);
     background-color: var(--u2u-nav-item-text-strong);
   }
 
-  .u2u-nav-popup-button--danger {
+  .u2u-nav-remove-all {
     color: var(--fgColor-danger);
-    background-color: transparent;
-    border: 1px solid var(--fgColor-danger);
+    background: transparent;
+    border: none;
+    borer-bottom: 1px solid var(--fgColor-danger);
+    padding: 0;
+    font-size: 12px;
   }
 `, { sourceName: 'render-app-settings' });
 
@@ -306,10 +286,10 @@ const getAppSettings = ({ isActive = false }) => {
           <h2 class="u2u-nav-popup-title">${IconCog} <span>Settings</span></h2>
           <div>
             Users saved: <strong>${totalSavedUsers}</strong>
+            ${totalSavedUsers === 0 ? '' : `<button id="u2u-remove-all-users" class="u2u-nav-remove-all">
+              remove all
+            </button>`}
           </div>
-          ${totalSavedUsers === 0 ? '' : `<button id="u2u-remove-all-users" class="u2u-nav-popup-button u2u-nav-popup-button--danger">
-            ${IconRemoveUsers} <span>remove all saved users</span>
-          </button>`}
           <br />
           <div>
             You can learn more or report an issue here:
@@ -486,6 +466,9 @@ const getAppStatus = () => {
         <div class="u2u-nav-popup-content">
           <h2 class="u2u-nav-popup-title">${IconUser} <span>Edit user label</span></h2>
           <input type="text" placeholder="${displayName}" />
+          <button class="u2u-nav-popup-button">
+            ${IconSave} <span>save</span>
+          </button>
         </div>
       </div>`}
     </div>`;
@@ -632,6 +615,32 @@ const getAppStatus = () => {
     height: 0;
     border: 5px solid transparent;
     border-top-color: var(--u2u-nav-item-border);
+  }
+
+  .u2u-nav-popup-button {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 3px;
+    font-size: 14px;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+    background: none;
+    border: none;
+    color: var(--bgColor-default);
+    background-color: var(--fgColor-success);
+  }
+
+  .u2u-nav-popup-button:hover {
+    text-decoration: none;
+  }
+
+  .u2u-nav-popup-button svg {
+    fill: currentColor;
+    width: 18px;
+    height: 18px;
   }
 `, { sourceName: 'render-app' });
 

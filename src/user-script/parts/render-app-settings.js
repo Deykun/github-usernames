@@ -1,39 +1,16 @@
 appendCSS(`
-  .u2u-nav-popup-button {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    align-items: center;
-    padding: 8px 4px;
-    border-radius: 3px;
-    font-size: 14px;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-    background: none;
-    border: none;
-    color: var(--bgColor-default);
-    background-color: var(--fgColor-success);
-  }
-
-  .u2u-nav-popup-button:hover {
-    text-decoration: none;
-  }
-
-  .u2u-nav-popup-button svg {
-    fill: currentColor;
-    width: 26px;
-    height: 26px;
-  }
-
-  .u2u-nav-popup-button--github {
+  .u2u-nav-popup-button.u2u-nav-popup-button--github {
     color: var(--u2u-nav-item-bg);
     background-color: var(--u2u-nav-item-text-strong);
   }
 
-  .u2u-nav-popup-button--danger {
+  .u2u-nav-remove-all {
     color: var(--fgColor-danger);
-    background-color: transparent;
-    border: 1px solid var(--fgColor-danger);
+    background: transparent;
+    border: none;
+    borer-bottom: 1px solid var(--fgColor-danger);
+    padding: 0;
+    font-size: 12px;
   }
 `, { sourceName: 'render-app-settings' });
 
@@ -48,10 +25,10 @@ export const getAppSettings = ({ isActive = false }) => {
           <h2 class="u2u-nav-popup-title">${IconCog} <span>Settings</span></h2>
           <div>
             Users saved: <strong>${totalSavedUsers}</strong>
+            ${totalSavedUsers === 0 ? '' : `<button id="u2u-remove-all-users" class="u2u-nav-remove-all">
+              remove all
+            </button>`}
           </div>
-          ${totalSavedUsers === 0 ? '' : `<button id="u2u-remove-all-users" class="u2u-nav-popup-button u2u-nav-popup-button--danger">
-            ${IconRemoveUsers} <span>remove all saved users</span>
-          </button>`}
           <br />
           <div>
             You can learn more or report an issue here:
