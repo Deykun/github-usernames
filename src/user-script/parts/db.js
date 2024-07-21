@@ -26,7 +26,10 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
     : {};
 
   const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
-    stack[username] = value;
+    const isValidUsername = username && !username.includes(' ');
+    if (isValidUsername) {
+      stack[username] = value;
+    }
 
     return stack;
   }, JSON.parse(JSON.stringify(oldUserByUsernames)));

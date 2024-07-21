@@ -7,8 +7,8 @@
 // @include         https://*github.com*
 // @grant           none
 // @run-at          document-start
-// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/github-usernames-to-names.user-srcipt.js
-// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames-to-names/main/github-usernames-to-names.user-srcipt.js
+// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
+// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
 // ==/UserScript==
 
 'use strict';
@@ -43,7 +43,7 @@ const userScriptLogger = (params) => {
 
     if (isCritical) {
       // eslint-disable-next-line no-console
-      console.error('A User2Names error (from Tampermonkey) has occurred. You can ignore it, or describe the error and create an issue here: https://github.com/Deykun/github-usernames-to-names/issues');
+      console.error('A User2Names error (from Tampermonkey) has occurred. You can ignore it, or describe the error and create an issue here: https://github.com/Deykun/github-usernames/issues');
       // eslint-disable-next-line no-console
       console.error(`U2N error: ${message}`);
       // eslint-disable-next-line no-console
@@ -100,7 +100,10 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
     : {};
 
   const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
-    stack[username] = value;
+    const isValidUsername = username && !username.includes(' ');
+    if (isValidUsername) {
+      stack[username] = value;
+    }
 
     return stack;
   }, JSON.parse(JSON.stringify(oldUserByUsernames)));
@@ -235,6 +238,9 @@ const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 const IconEye = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636C20.118 13.473 16.806 17 12.015 17c-4.42 0-7.93-3.536-9.478-5.407C4.03 9.946 7.354 7 12.015 7zm0-2C4.446 5 0 11.551 0 11.551S4.835 19 12.015 19C19.748 19 24 11.551 24 11.551S19.709 5 12.015 5zM12 8c-2.21 0-4 1.791-4 4s1.79 4 4 4c2.209 0 4-1.791 4-4s-1.791-4-4-4zm-.004 3.999c-.564.564-1.479.564-2.044 0s-.565-1.48 0-2.044c.564-.564 1.479-.564 2.044 0s.565 1.479 0 2.044z"/>
 </svg>`;
+const IconGithub = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+<path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+</svg>`;
 const IconNewUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M9.602 3.7c-1.154 1.937-.635 5.227 1.424 9.025.93 1.712.697 3.02.338 3.815-.982 2.178-3.675 2.799-6.525 3.456C2.875 20.45 3 20.866 3 24H1.005L1 22.759c0-2.52.199-3.975 3.178-4.663 3.365-.777 6.688-1.473 5.09-4.418C4.535 4.949 7.918 0 13 0c3.321 0 5.97 2.117 5.97 6.167 0 3.555-1.949 6.833-2.383 7.833h-2.115c.392-1.536 2.499-4.366 2.499-7.842 0-5.153-5.867-4.985-7.369-2.458zM23 19h-3v-3h-2v3h-3v2h3v3h2v-3h3v-2z"/>
 </svg>`;
@@ -245,17 +251,51 @@ const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M20.822 18.096c-3.439-.794-6.641-1.49-5.09-4.418C20.451 4.766 16.983 0 12 0 6.918 0 3.535 4.949 8.268 13.678c1.598 2.945-1.725 3.641-5.09 4.418C.199 18.784 0 20.239 0 22.759L.005 24H2c0-3.134-.125-3.55 1.838-4.003 2.851-.657 5.543-1.278 6.525-3.456.359-.795.592-2.103-.338-3.815C7.967 8.927 7.447 5.637 8.602 3.7c1.354-2.275 5.426-2.264 6.767-.034 1.15 1.911.639 5.219-1.403 9.076-.91 1.719-.671 3.023-.31 3.814.99 2.167 3.707 2.794 6.584 3.458C22.119 20.45 22 20.896 22 24h1.995L24 22.759c0-2.52-.199-3.975-3.178-4.663z"/>
 </svg>`;
 
-    const getAppSettings = ({ isActive = false }) => {
+    appendCSS(`
+  .u2u-nav-github-link {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 4px;
+    background-color: black;
+    color: white;
+    border-radius: 3px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    text-decoration: none;
+  }
+
+  .u2u-nav-github-link:hover {
+    text-decoration: none;
+  }
+
+  .u2u-nav-github-link svg {
+    fill: currentColor;
+    width: 16px;
+    height: 16px;
+  }
+`, { sourceName: 'render-app-settings' });
+
+const getAppSettings = ({ isActive = false }) => {
   return `<div class="u2u-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2u-nav-button" data-content="settings">${IconCog}</button>`
     : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconCog}</button>
-    <div class="u2u-nav-button-content">
-      <div>
-        <p>
-          You can report an issue here: <a href="https://github.com/Deykun/github-usernames-to-names" target="_blank">github.com/Deykun/github-usernames-to-names</a>
-        </p>
-      </div>
+      <div class="u2u-nav-popup">
+        <div class="u2u-nav-popup-content">
+          <h2 class="u2u-nav-popup-title">${IconCog} <span>Settings</span></h2>
+          <p>
+            Users saved: <strong>${Object.values(window.U2N.usersByUsernames).length}</strong>
+          </p>
+          <p>
+            You can report an issue or learn more here:
+          </p>
+          <a class="u2u-nav-github-link" href="https://github.com/Deykun/github-usernames" target="_blank">
+            ${IconGithub}
+            <span>deykun/github-usernames</span>
+          </a>
+        </div>
       </div>`}
     </div>`;
 };
@@ -277,40 +317,72 @@ const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       ${!isActive
     ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
     : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
-    <div class="u2u-nav-button-content">
-        <div>
-          <h4>Colors</h4>
-          <ul>
-            <li>
-              <label>
-                <input type="radio" name="color" value="light" />
-                <span>Light</span>
-              </label>
-            </li>
-            <li>
-              <label>
-                <input type="radio" name="color" value="dark" />
-                <span>Dark</span>
-              </label>
-            </li>
-          </ul>
-        </div>
-        <div>
-          <h4>Show avatar</h4>
-          <ul>
-            <li>
-              <label>
-                <input type="radio" name="avatar" value="1" />
-                <span>Show</span>
-              </label>
-            </li>
-            <li>
-              <label>
-                <input type="radio" name="avatar" value="0" />
-                <span>Hide</span>
-              </label>
-            </li>
-          </ul>
+      <div class="u2u-nav-popup">
+        <div class="u2u-nav-popup-content">
+          <h2 class="u2u-nav-popup-title">${IconThemes} <span>Theme</span></h2>
+          <div>
+            <h4>Colors</h4>
+            <ul>
+              <li>
+                <label>
+                  <input type="radio" name="color" value="light" />
+                  <span>Light</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="radio" name="color" value="dark" />
+                  <span>Dark</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4>Tags</h4>
+            <ul>
+              <li>
+                <label>
+                  <input type="radio" name="users" value="light" />
+                  <span>Dwight Schrute</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="radio" name="users" value="light" />
+                  <span>Dwight S.</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="radio" name="users" value="light" />
+                  <span>Dwight</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="radio" name="users" value="light" />
+                  <span>D. Schrute</span>
+                </label>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h4>Other</h4>
+            <ul>
+              <li>
+                <label>
+                  <input type="checkbox" name="avatar" />
+                  <span>show avatars</span>
+                </label>
+              </li>
+              <li>
+                <label>
+                  <input type="checkbox" name="avatar" />
+                  <span>capitalize only the first letters</span>
+                </label>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>`}
     </div>`;
@@ -331,11 +403,11 @@ const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
       ${!isActive
     ? `<button class="u2u-nav-button" data-content="user">${IconUser}</button>`
     : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconUser}</button>
-      <div class="u2u-nav-button-content">
-        <div>
-          Edit user
+      <div class="u2u-nav-popup">
+        <div class="u2u-nav-popup-content">
+          <h2 class="u2u-nav-popup-title">${IconUser} <span>Edit user label</span></h2>
+          <input type="text" placeholder="${displayName}" />
         </div>
-        <input type="text" placeholder="${displayName}" />
       </div>`}
     </div>`;
 };
@@ -447,17 +519,11 @@ const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     line-height: var(--u2u-nav-item-size);
   }
 
-  .u2u-nav-button-content {
+  .u2u-nav-popup {
     position: absolute;
     right: 0;
     bottom: calc(100% + 10px);
-    display: flex;
-    flex-flow: column;
-    gap: 15px;
-    width: 200px;
-    line-height: 1.4;
-    text-align: left;
-    padding: 10px;
+    width: 250px;
     color: var(--u2u-nav-item-text-strong);
     border: 1px solid var(--u2u-nav-item-border);
     border-radius: var(--u2u-nav-item-radius);
@@ -465,15 +531,55 @@ const IconUser = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     background-color: var(--u2u-nav-item-bg);
   }
 
-  .u2u-nav-button-content h4 {
+  .u2u-nav-popup-content {
+    display: flex;
+    flex-flow: column;
+    gap: 10px;
+    max-height: calc(100vh - 60px);
+    overflow: auto;
+    padding: 10px;
+    padding-top: 0;
+    font-size: 14px;
+    line-height: 1.2;
+    text-align: left;
+  }
+
+  .u2u-nav-popup-title {
+    position: sticky;
+    top: 0px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-top: 10px;
+    padding-bottom: 5px;
+    font-size: 16px;
+    background-color: var(--u2u-nav-item-bg);
+  }
+
+  .u2u-nav-popup-title svg {
+    fill: currentColor;
+    height: 16px;
+    width: 16px;
+  }
+
+  .u2u-nav-popup h4 {
     margin-bottom: 5px;
   }
 
-  .u2u-nav-button-content ul {
+  .u2u-nav-popup ul {
     list-style: none;
   }
 
-  .u2u-nav-button-content::after {
+  .u2u-nav-popup label {
+    font-weight: 400;
+  }
+
+  .u2u-nav-popup label input {
+    margin-left: 5px;
+    margin-right: 5px;
+  }
+
+  .u2u-nav-popup::after {
     content: '';
     position: absolute;
     bottom: -10px;

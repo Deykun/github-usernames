@@ -38,4 +38,4 @@ console.log()
 console.log(chalk.green("Saving..."));
 console.log()
 
-fs.writeFileSync('./public/github-usernames-to-names.user-srcipt.js', template);
+fs.writeFileSync('./public/github-usernames.user-srcipt.js', template);
