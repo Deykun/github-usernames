@@ -28,9 +28,11 @@ export const getAppUser = ({ isActive = false }) => {
               Name: <strong>${user.name}</strong>
             </li>
           </ul>
+          <br />
           ${getTextInput({
-    label: 'Edit user label',
+    label: 'Edit display name',
     placeholder: displayName,
+    value: displayName,
     idButton: 'user-save-name',
     idInput: 'user-value-name',
   })}

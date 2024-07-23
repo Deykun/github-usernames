@@ -16,7 +16,7 @@ appendCSS(`
     bottom: 0;
     right: 30px;
     height: var(--u2n-nav-item-size);
-    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.06));
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
   }
 
   .u2n-nav > * + * {
@@ -90,7 +90,7 @@ appendCSS(`
     overflow: auto;
     padding: 10px;
     padding-top: 0;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1.2;
     text-align: left;
   }
@@ -113,7 +113,8 @@ appendCSS(`
     width: 16px;
   }
 
-  .u2n-nav-popup h4 {
+  .u2n-nav-popup h3 {
+    font-size: 13px;
     margin-bottom: 8px;
   }
 
@@ -122,6 +123,11 @@ appendCSS(`
     flex-flow: column;
     gap: 8px;
     list-style: none;
+  }
+
+  .u2n-nav-popup .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .u2n-nav-popup::after {

@@ -3,8 +3,11 @@ const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(k
   : { ...defaultValues });
 
 const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {
-  colors: 'light',
-  names: 'names-s',
+  color: 'light',
+  name: 'name-s',
+  shouldShowAvatars: true,
+  shouldFilterBySubstring: false,
+  filterSubstring: '',
 });
 
 const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');

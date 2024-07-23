@@ -27,6 +27,8 @@ const themeSettings = {
 };
 
 export const getAppTheme = ({ isActive = false }) => {
+  const { settings } = window.U2N;
+
   return `<div class="u2n-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2n-nav-button" data-content="theme">${IconThemes}</button>`
@@ -35,34 +37,37 @@ export const getAppTheme = ({ isActive = false }) => {
         <div class="u2n-nav-popup-content">
           <h2 class="u2n-nav-popup-title">${IconThemes} <span>Theme</span></h2>
           <div>
-            <h4>Colors</h4>
-            <ul>
+            <h3>Colors</h3>
+            <ul class="grid-2">
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
     name: 'color',
     id: `theme-color-${value}`,
     label,
     value,
+    isChecked: settings.color === value,
   })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Names</h4>
-            <ul>
+            <h3>Names</h3>
+            <ul class="grid-2">
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({
     name: 'names',
     id: `theme-names-${value}`,
     label,
     value,
+    isChecked: settings.name === value,
   })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Other</h4>
+            <h3>Other</h3>
             ${getCheckbox({
     id: 'settings-should-show-avatar',
     label: 'should show avatars',
+    isChecked: settings.shouldShowAvatars,
   })}
           </div>
         </div>

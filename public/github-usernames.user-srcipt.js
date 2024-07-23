@@ -18,8 +18,11 @@ const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(k
   : { ...defaultValues });
 
 const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {
-  colors: 'light',
-  names: 'names-s',
+  color: 'light',
+  name: 'name-s',
+  shouldShowAvatars: true,
+  shouldFilterBySubstring: false,
+  filterSubstring: '',
 });
 
 const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
@@ -289,14 +292,17 @@ const IconRemoveUsers = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24
   left: 5px;
   transform: translateY(-50%);
   background-color: var(--u2n-nav-item-bg);
-  padding: 0 5px;
-  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-size: 9px;
 }
 `, { sourceName: 'interface-text-input' });
 
-const getTextInput = ({ idInput, idButton, label, placeholder }) => {
+const getTextInput = ({
+  idInput, idButton, label, value = '', placeholder,
+}) => {
   return `<div class="u2n-text-input-wrapper">
-    <input id="${idInput}" type="text" placeholder="${placeholder}" />
+    <input id="${idInput}" type="text" value="${value}" placeholder="${placeholder}" />
     ${label ? `<label>${label}</label>` : ''}
     <button id="${idButton}" class="u2n-nav-popup-button" title="Save">
       ${IconSave}
@@ -307,6 +313,7 @@ const getTextInput = ({ idInput, idButton, label, placeholder }) => {
 appendCSS(`
 .u2n-checkbox-wrapper {
   display: flex;
+  align-items: center;
   gap: 5px;
   font-weight: 400;
 }
@@ -318,10 +325,18 @@ appendCSS(`
 `, { sourceName: 'interface-value' });
 
 const getCheckbox = ({
-  idInput, label, name, value, type = 'checkbox',
+  idInput, label, name, value, isChecked = false, type = 'checkbox',
 }) => {
   return `<label class="u2n-checkbox-wrapper">
-    <span><input type="${type}" id="${idInput}" name="${name}" ${value ? `value="${value}"` : ''} /></span>
+    <span>
+      <input
+        type="${type}"
+        id="${idInput}"
+        name="${name}"
+        ${value ? `value="${value}"` : ''}
+        ${isChecked ? ' checked' : ''}
+      />
+    </span>
     <span>${label}</span>
   </label>`;
 };
@@ -347,7 +362,9 @@ const getRadiobox = (params) => {
 `, { sourceName: 'render-app-settings' });
 
 const getAppSettings = ({ isActive = false }) => {
+  const { settings } = window.U2N;
   const totalSavedUsers = Object.values(window.U2N.usersByUsernames).length;
+
   return `<div class="u2n-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2n-nav-button" data-content="settings">${IconCog}</button>`
@@ -365,12 +382,14 @@ const getAppSettings = ({ isActive = false }) => {
           ${getCheckbox({
     id: 'settings-should-use-substring',
     label: 'only use names from profiles when their username contains the specified string',
+    isChecked: settings.shouldFilterBySubstring,
   })}
           ${getTextInput({
     label: 'Edit substring',
     placeholder: 'ex. company_',
     idButton: 'settings-save-substring',
     idInput: 'settings-value-substring',
+    value: settings.filterSubstring,
   })}
           <br />
           <div>
@@ -482,6 +501,8 @@ const getAppStatus = () => {
 };
 
 const getAppTheme = ({ isActive = false }) => {
+  const { settings } = window.U2N;
+
   return `<div class="u2n-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2n-nav-button" data-content="theme">${IconThemes}</button>`
@@ -490,34 +511,37 @@ const getAppTheme = ({ isActive = false }) => {
         <div class="u2n-nav-popup-content">
           <h2 class="u2n-nav-popup-title">${IconThemes} <span>Theme</span></h2>
           <div>
-            <h4>Colors</h4>
-            <ul>
+            <h3>Colors</h3>
+            <ul class="grid-2">
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
     name: 'color',
     id: `theme-color-${value}`,
     label,
     value,
+    isChecked: settings.color === value,
   })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Names</h4>
-            <ul>
+            <h3>Names</h3>
+            <ul class="grid-2">
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({
     name: 'names',
     id: `theme-names-${value}`,
     label,
     value,
+    isChecked: settings.name === value,
   })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Other</h4>
+            <h3>Other</h3>
             ${getCheckbox({
     id: 'settings-should-show-avatar',
     label: 'should show avatars',
+    isChecked: settings.shouldShowAvatars,
   })}
           </div>
         </div>
@@ -555,9 +579,11 @@ const getAppTheme = ({ isActive = false }) => {
               Name: <strong>${user.name}</strong>
             </li>
           </ul>
+          <br />
           ${getTextInput({
-    label: 'Edit user label',
+    label: 'Edit display name',
     placeholder: displayName,
+    value: displayName,
     idButton: 'user-save-name',
     idInput: 'user-value-name',
   })}
@@ -584,7 +610,7 @@ const getAppTheme = ({ isActive = false }) => {
     bottom: 0;
     right: 30px;
     height: var(--u2n-nav-item-size);
-    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.06));
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
   }
 
   .u2n-nav > * + * {
@@ -658,7 +684,7 @@ const getAppTheme = ({ isActive = false }) => {
     overflow: auto;
     padding: 10px;
     padding-top: 0;
-    font-size: 14px;
+    font-size: 12px;
     line-height: 1.2;
     text-align: left;
   }
@@ -681,7 +707,8 @@ const getAppTheme = ({ isActive = false }) => {
     width: 16px;
   }
 
-  .u2n-nav-popup h4 {
+  .u2n-nav-popup h3 {
+    font-size: 13px;
     margin-bottom: 8px;
   }
 
@@ -690,6 +717,11 @@ const getAppTheme = ({ isActive = false }) => {
     flex-flow: column;
     gap: 8px;
     list-style: none;
+  }
+
+  .u2n-nav-popup .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 
   .u2n-nav-popup::after {

@@ -15,7 +15,9 @@ appendCSS(`
 `, { sourceName: 'render-app-settings' });
 
 export const getAppSettings = ({ isActive = false }) => {
+  const { settings } = window.U2N;
   const totalSavedUsers = Object.values(window.U2N.usersByUsernames).length;
+
   return `<div class="u2n-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2n-nav-button" data-content="settings">${IconCog}</button>`
@@ -33,12 +35,14 @@ export const getAppSettings = ({ isActive = false }) => {
           ${getCheckbox({
     id: 'settings-should-use-substring',
     label: 'only use names from profiles when their username contains the specified string',
+    isChecked: settings.shouldFilterBySubstring,
   })}
           ${getTextInput({
     label: 'Edit substring',
     placeholder: 'ex. company_',
     idButton: 'settings-save-substring',
     idInput: 'settings-value-substring',
+    value: settings.filterSubstring,
   })}
           <br />
           <div>

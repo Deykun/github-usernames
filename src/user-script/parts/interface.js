@@ -16,14 +16,17 @@ appendCSS(`
   left: 5px;
   transform: translateY(-50%);
   background-color: var(--u2n-nav-item-bg);
-  padding: 0 5px;
-  font-size: 10px;
+  padding: 2px 5px;
+  border-radius: 2px;
+  font-size: 9px;
 }
 `, { sourceName: 'interface-text-input' });
 
-const getTextInput = ({ idInput, idButton, label, placeholder }) => {
+const getTextInput = ({
+  idInput, idButton, label, value = '', placeholder,
+}) => {
   return `<div class="u2n-text-input-wrapper">
-    <input id="${idInput}" type="text" placeholder="${placeholder}" />
+    <input id="${idInput}" type="text" value="${value}" placeholder="${placeholder}" />
     ${label ? `<label>${label}</label>` : ''}
     <button id="${idButton}" class="u2n-nav-popup-button" title="Save">
       ${IconSave}
@@ -34,6 +37,7 @@ const getTextInput = ({ idInput, idButton, label, placeholder }) => {
 appendCSS(`
 .u2n-checkbox-wrapper {
   display: flex;
+  align-items: center;
   gap: 5px;
   font-weight: 400;
 }
@@ -45,10 +49,18 @@ appendCSS(`
 `, { sourceName: 'interface-value' });
 
 const getCheckbox = ({
-  idInput, label, name, value, type = 'checkbox',
+  idInput, label, name, value, isChecked = false, type = 'checkbox',
 }) => {
   return `<label class="u2n-checkbox-wrapper">
-    <span><input type="${type}" id="${idInput}" name="${name}" ${value ? `value="${value}"` : ''} /></span>
+    <span>
+      <input
+        type="${type}"
+        id="${idInput}"
+        name="${name}"
+        ${value ? `value="${value}"` : ''}
+        ${isChecked ? ' checked' : ''}
+      />
+    </span>
     <span>${label}</span>
   </label>`;
 };
