@@ -2,7 +2,11 @@ const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(k
   ? { ...defaultValues, ...JSON.parse(localStorage.getItem(key)) }
   : { ...defaultValues });
 
-const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {});
+const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {
+  colors: 'light',
+  names: 'names-s',
+});
+
 const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 

@@ -4,7 +4,7 @@
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
 // @version         0.9
-// @include         https://*github.com*
+// @include         https://github.com*
 // @grant           none
 // @run-at          document-start
 // @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
@@ -17,7 +17,11 @@ const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(k
   ? { ...defaultValues, ...JSON.parse(localStorage.getItem(key)) }
   : { ...defaultValues });
 
-const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {});
+const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {
+  colors: 'light',
+  names: 'names-s',
+});
+
 const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 
@@ -271,17 +275,29 @@ const IconRemoveUsers = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24
 .u2n-text-input-wrapper {
   display: flex;
   gap: 5px;
+  position: relative;
 }
 
 .u2n-text-input-wrapper input {
   width: 100%;
   padding-left: 10px;
 }
+
+.u2n-text-input-wrapper label {
+  position: absolute;
+  top: 0;
+  left: 5px;
+  transform: translateY(-50%);
+  background-color: var(--u2n-nav-item-bg);
+  padding: 0 5px;
+  font-size: 10px;
+}
 `, { sourceName: 'interface-text-input' });
 
-const getTextInput = ({ idInput, idButton, placeholder }) => {
+const getTextInput = ({ idInput, idButton, label, placeholder }) => {
   return `<div class="u2n-text-input-wrapper">
     <input id="${idInput}" type="text" placeholder="${placeholder}" />
+    ${label ? `<label>${label}</label>` : ''}
     <button id="${idButton}" class="u2n-nav-popup-button" title="Save">
       ${IconSave}
     </button>
@@ -292,6 +308,7 @@ appendCSS(`
 .u2n-checkbox-wrapper {
   display: flex;
   gap: 5px;
+  font-weight: 400;
 }
 
 .u2n-checkbox-wrapper input {
@@ -300,11 +317,17 @@ appendCSS(`
 }
 `, { sourceName: 'interface-value' });
 
-const getCheckbox = ({ idInput, label }) => {
+const getCheckbox = ({
+  idInput, label, name, value, type = 'checkbox',
+}) => {
   return `<label class="u2n-checkbox-wrapper">
-    <span><input type="checkbox" id="${idInput}" /></span>
+    <span><input type="${type}" id="${idInput}" name="${name}" ${value ? `value="${value}"` : ''} /></span>
     <span>${label}</span>
   </label>`;
+};
+
+const getRadiobox = (params) => {
+  return getCheckbox({ ...params, type: 'radio' });
 };
 
     appendCSS(`
@@ -344,6 +367,7 @@ const getAppSettings = ({ isActive = false }) => {
     label: 'only use names from profiles when their username contains the specified string',
   })}
           ${getTextInput({
+    label: 'Edit substring',
     placeholder: 'ex. company_',
     idButton: 'settings-save-substring',
     idInput: 'settings-value-substring',
@@ -429,7 +453,35 @@ const getAppStatus = () => {
   </span>`;
 };
 
-    const getAppTheme = ({ isActive = false }) => {
+    const themeSettings = {
+  colors: [{
+    label: 'Light',
+    value: 'light',
+  },
+  {
+    label: 'Dark',
+    value: 'dark',
+  }],
+  names: [
+    {
+      label: 'Dwight Schrute',
+      value: 'name-surname',
+    },
+    {
+      label: 'Dwight S.',
+      value: 'name-s',
+    },
+    {
+      label: 'Dwight',
+      value: 'name',
+    },
+    {
+      label: 'D. Schrute',
+      value: 'n-surname',
+    }],
+};
+
+const getAppTheme = ({ isActive = false }) => {
   return `<div class="u2n-nav-button-wrapper">
       ${!isActive
     ? `<button class="u2n-nav-button" data-content="theme">${IconThemes}</button>`
@@ -440,59 +492,33 @@ const getAppStatus = () => {
           <div>
             <h4>Colors</h4>
             <ul>
-              <li>
-                <label>
-                  <input type="radio" name="color" value="light" />
-                  <span>Light</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="color" value="dark" />
-                  <span>Dark</span>
-                </label>
-              </li>
+              ${themeSettings.colors.map(({ label, value }) => `<li>
+              ${getRadiobox({
+    name: 'color',
+    id: `theme-color-${value}`,
+    label,
+    value,
+  })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Tags</h4>
+            <h4>Names</h4>
             <ul>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight Schrute</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight S.</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>D. Schrute</span>
-                </label>
-              </li>
+            ${themeSettings.names.map(({ label, value }) => `<li>
+            ${getRadiobox({
+    name: 'names',
+    id: `theme-names-${value}`,
+    label,
+    value,
+  })}</li>`).join('')}
             </ul>
           </div>
           <div>
             <h4>Other</h4>
-            <ul>
-              <li>
-                <label>
-                  <input type="checkbox" name="avatar" />
-                  <span>show avatars</span>
-                </label>
-              </li>
-            </ul>
+            ${getCheckbox({
+    id: 'settings-should-show-avatar',
+    label: 'should show avatars',
+  })}
           </div>
         </div>
       </div>`}
@@ -508,6 +534,7 @@ const getAppStatus = () => {
     return '';
   }
 
+  const user = window.U2N.usersByUsernames?.[username] || {};
   const displayName = getDisplayNameByUsername(username);
 
   return `<div class="u2n-nav-button-wrapper">
@@ -516,8 +543,20 @@ const getAppStatus = () => {
     : `<button class="u2n-nav-button u2n-nav-button--active" data-content="">${IconUser}</button>
       <div class="u2n-nav-popup">
         <div class="u2n-nav-popup-content">
-          <h2 class="u2n-nav-popup-title">${IconUser} <span>Edit user label</span></h2>
+          <h2 class="u2n-nav-popup-title">${IconUser} <span>User</span></h2>
+          <ul>
+            <li>
+              ID: <strong>${user.id}</strong>
+            </li>
+            <li>
+              Username: <strong>${user.username}</strong>
+            </li>
+            <li>
+              Name: <strong>${user.name}</strong>
+            </li>
+          </ul>
           ${getTextInput({
+    label: 'Edit user label',
     placeholder: displayName,
     idButton: 'user-save-name',
     idInput: 'user-value-name',
@@ -614,7 +653,7 @@ const getAppStatus = () => {
   .u2n-nav-popup-content {
     display: flex;
     flex-flow: column;
-    gap: 10px;
+    gap: 15px;
     max-height: calc(100vh - 60px);
     overflow: auto;
     padding: 10px;
@@ -643,20 +682,14 @@ const getAppStatus = () => {
   }
 
   .u2n-nav-popup h4 {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
   }
 
   .u2n-nav-popup ul {
+    display: flex;
+    flex-flow: column;
+    gap: 8px;
     list-style: none;
-  }
-
-  .u2n-nav-popup label {
-    font-weight: 400;
-  }
-
-  .u2n-nav-popup label input {
-    margin-left: 5px;
-    margin-right: 5px;
   }
 
   .u2n-nav-popup::after {

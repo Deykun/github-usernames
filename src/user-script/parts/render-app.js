@@ -85,7 +85,7 @@ appendCSS(`
   .u2n-nav-popup-content {
     display: flex;
     flex-flow: column;
-    gap: 10px;
+    gap: 15px;
     max-height: calc(100vh - 60px);
     overflow: auto;
     padding: 10px;
@@ -114,20 +114,14 @@ appendCSS(`
   }
 
   .u2n-nav-popup h4 {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
   }
 
   .u2n-nav-popup ul {
+    display: flex;
+    flex-flow: column;
+    gap: 8px;
     list-style: none;
-  }
-
-  .u2n-nav-popup label {
-    font-weight: 400;
-  }
-
-  .u2n-nav-popup label input {
-    margin-left: 5px;
-    margin-right: 5px;
   }
 
   .u2n-nav-popup::after {

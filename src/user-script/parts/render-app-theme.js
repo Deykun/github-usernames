@@ -1,3 +1,31 @@
+const themeSettings = {
+  colors: [{
+    label: 'Light',
+    value: 'light',
+  },
+  {
+    label: 'Dark',
+    value: 'dark',
+  }],
+  names: [
+    {
+      label: 'Dwight Schrute',
+      value: 'name-surname',
+    },
+    {
+      label: 'Dwight S.',
+      value: 'name-s',
+    },
+    {
+      label: 'Dwight',
+      value: 'name',
+    },
+    {
+      label: 'D. Schrute',
+      value: 'n-surname',
+    }],
+};
+
 export const getAppTheme = ({ isActive = false }) => {
   return `<div class="u2n-nav-button-wrapper">
       ${!isActive
@@ -9,59 +37,33 @@ export const getAppTheme = ({ isActive = false }) => {
           <div>
             <h4>Colors</h4>
             <ul>
-              <li>
-                <label>
-                  <input type="radio" name="color" value="light" />
-                  <span>Light</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="color" value="dark" />
-                  <span>Dark</span>
-                </label>
-              </li>
+              ${themeSettings.colors.map(({ label, value }) => `<li>
+              ${getRadiobox({
+    name: 'color',
+    id: `theme-color-${value}`,
+    label,
+    value,
+  })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Tags</h4>
+            <h4>Names</h4>
             <ul>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight Schrute</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight S.</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>D. Schrute</span>
-                </label>
-              </li>
+            ${themeSettings.names.map(({ label, value }) => `<li>
+            ${getRadiobox({
+    name: 'names',
+    id: `theme-names-${value}`,
+    label,
+    value,
+  })}</li>`).join('')}
             </ul>
           </div>
           <div>
             <h4>Other</h4>
-            <ul>
-              <li>
-                <label>
-                  <input type="checkbox" name="avatar" />
-                  <span>show avatars</span>
-                </label>
-              </li>
-            </ul>
+            ${getCheckbox({
+    id: 'settings-should-show-avatar',
+    label: 'should show avatars',
+  })}
           </div>
         </div>
       </div>`}

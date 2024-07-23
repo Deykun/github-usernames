@@ -4,7 +4,7 @@
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
 // @version         0.9
-// @include         https://*github.com*
+// @include         https://github.com*
 // @grant           none
 // @run-at          document-start
 // @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js

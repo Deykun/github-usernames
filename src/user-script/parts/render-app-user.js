@@ -7,6 +7,7 @@ export const getAppUser = ({ isActive = false }) => {
     return '';
   }
 
+  const user = window.U2N.usersByUsernames?.[username] || {};
   const displayName = getDisplayNameByUsername(username);
 
   return `<div class="u2n-nav-button-wrapper">
@@ -15,8 +16,20 @@ export const getAppUser = ({ isActive = false }) => {
     : `<button class="u2n-nav-button u2n-nav-button--active" data-content="">${IconUser}</button>
       <div class="u2n-nav-popup">
         <div class="u2n-nav-popup-content">
-          <h2 class="u2n-nav-popup-title">${IconUser} <span>Edit user label</span></h2>
+          <h2 class="u2n-nav-popup-title">${IconUser} <span>User</span></h2>
+          <ul>
+            <li>
+              ID: <strong>${user.id}</strong>
+            </li>
+            <li>
+              Username: <strong>${user.username}</strong>
+            </li>
+            <li>
+              Name: <strong>${user.name}</strong>
+            </li>
+          </ul>
           ${getTextInput({
+    label: 'Edit user label',
     placeholder: displayName,
     idButton: 'user-save-name',
     idInput: 'user-value-name',

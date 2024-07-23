@@ -35,6 +35,7 @@ export const getAppSettings = ({ isActive = false }) => {
     label: 'only use names from profiles when their username contains the specified string',
   })}
           ${getTextInput({
+    label: 'Edit substring',
     placeholder: 'ex. company_',
     idButton: 'settings-save-substring',
     idInput: 'settings-value-substring',
