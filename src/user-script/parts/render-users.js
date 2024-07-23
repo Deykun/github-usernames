@@ -54,8 +54,7 @@ appendCSS(`
     position: absolute;
     left: 0;
     top: 0;
-    border-top-left-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-radius: 4px;
     height: 100%;
     aspect-ratio: 1 / 1;
   }

@@ -1,3 +1,13 @@
+appendCSS(`
+  .u2n-nav-user-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 20px;
+    font-size: 10px;
+  }
+`, { sourceName: 'render-app-user' });
+
 export const getAppUser = ({ isActive = false }) => {
   const isProfilPage = Boolean(document.querySelector('.page-profile'));
   const username = location.pathname.replace('/', '');
@@ -17,6 +27,9 @@ export const getAppUser = ({ isActive = false }) => {
       <div class="u2n-nav-popup">
         <div class="u2n-nav-popup-content">
           <h2 class="u2n-nav-popup-title">${IconUser} <span>User</span></h2>
+          <div class="u2n-nav-user-preview">
+            <strong data-hovercard-url="/users/${user.username}/fake">${user.username}</strong>
+          </div>
           <ul>
             <li>
               ID: <strong>${user.id}</strong>
