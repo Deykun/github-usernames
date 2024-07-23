@@ -65,9 +65,37 @@ const saveNewUser = (newUser) => {
   return false;
 };
 
+const saveDisplayNameForUsername = (username, name) => {
+  if (!username) {
+    return false;
+  }
+
+  const customNamesByUsernames = getCustomNamesByUsernamesFromLS();
+
+  if (name) {
+    customNamesByUsernames[username] = name;
+  } else {
+    delete customNamesByUsernames[username];
+  }
+
+  window.U2N.customNamesByUsernames = customNamesByUsernames;
+
+  localStorage.setItem('u2n-users-names', JSON.stringify(customNamesByUsernames));
+
+  renderUsers();
+  updateStatus({
+    type: 'users-update',
+    text: `<strong>${username}</strong>'s display name was updated.`,
+  });
+
+  return true;
+};
+
 const resetUsers = () => {
   localStorage.removeItem('u2n-users');
+  localStorage.removeItem('u2n-users-names');
   window.U2N.usersByUsernames = {};
+  window.U2N.customNamesByUsernames = {};
   renderUsers();
   updateStatus({
     type: 'users-reset',

@@ -156,9 +156,37 @@ const saveNewUser = (newUser) => {
   return false;
 };
 
+const saveDisplayNameForUsername = (username, name) => {
+  if (!username) {
+    return false;
+  }
+
+  const customNamesByUsernames = getCustomNamesByUsernamesFromLS();
+
+  if (name) {
+    customNamesByUsernames[username] = name;
+  } else {
+    delete customNamesByUsernames[username];
+  }
+
+  window.U2N.customNamesByUsernames = customNamesByUsernames;
+
+  localStorage.setItem('u2n-users-names', JSON.stringify(customNamesByUsernames));
+
+  renderUsers();
+  updateStatus({
+    type: 'users-update',
+    text: `<strong>${username}</strong>'s display name was updated.`,
+  });
+
+  return true;
+};
+
 const resetUsers = () => {
   localStorage.removeItem('u2n-users');
+  localStorage.removeItem('u2n-users-names');
   window.U2N.usersByUsernames = {};
+  window.U2N.customNamesByUsernames = {};
   renderUsers();
   updateStatus({
     type: 'users-reset',
@@ -234,6 +262,11 @@ const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0
 
 const getDisplayNameByUsername = (username) => {
   const user = window.U2N.usersByUsernames?.[username];
+  const customDisplayName = window.U2N.customNamesByUsernames?.[username];
+
+  if (customDisplayName) {
+    return customDisplayName;
+  }
 
   let displayName = user ? user?.username : username;
   if (user?.name) {
@@ -299,10 +332,16 @@ const IconRemoveUsers = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24
 `, { sourceName: 'interface-text-input' });
 
 const getTextInput = ({
-  idInput, idButton, label, value = '', placeholder,
+  idInput, idButton, label, name, value = '', placeholder,
 }) => {
   return `<div class="u2n-text-input-wrapper">
-    <input id="${idInput}" type="text" value="${value}" placeholder="${placeholder}" />
+    <input
+      id="${idInput}"
+      type="text"
+      ${name ? `name="${name}"` : ''}
+      value="${value}"
+      placeholder="${placeholder}"
+    />
     ${label ? `<label>${label}</label>` : ''}
     <button id="${idButton}" class="u2n-nav-popup-button" title="Save">
       ${IconSave}
@@ -511,7 +550,7 @@ const getAppTheme = ({ isActive = false }) => {
         <div class="u2n-nav-popup-content">
           <h2 class="u2n-nav-popup-title">${IconThemes} <span>Theme</span></h2>
           <div>
-            <h3>Colors</h3>
+            <h3>Color</h3>
             <ul class="grid-2">
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
@@ -524,7 +563,7 @@ const getAppTheme = ({ isActive = false }) => {
             </ul>
           </div>
           <div>
-            <h3>Names</h3>
+            <h3>Display name</h3>
             <ul class="grid-2">
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({
@@ -584,12 +623,26 @@ const getAppTheme = ({ isActive = false }) => {
     label: 'Edit display name',
     placeholder: displayName,
     value: displayName,
+    name: username,
     idButton: 'user-save-name',
     idInput: 'user-value-name',
   })}
         </div>
       </div>`}
     </div>`;
+};
+
+window.U2N.ui.eventsSubscribers.displayNameUpdate = {
+  selector: '#user-save-name',
+  handleClick: (_, calledByElement) => {
+    if (calledByElement) {
+      const inputElement = document.getElementById('user-value-name');
+      const username = inputElement.getAttribute('name');
+      const displayName = inputElement.value;
+
+      saveDisplayNameForUsername(username, displayName);
+    }
+  },
 };
 
     appendCSS(`

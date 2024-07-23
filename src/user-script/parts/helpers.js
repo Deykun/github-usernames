@@ -13,6 +13,11 @@ export const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.c
 
 export const getDisplayNameByUsername = (username) => {
   const user = window.U2N.usersByUsernames?.[username];
+  const customDisplayName = window.U2N.customNamesByUsernames?.[username];
+
+  if (customDisplayName) {
+    return customDisplayName;
+  }
 
   let displayName = user ? user?.username : username;
   if (user?.name) {

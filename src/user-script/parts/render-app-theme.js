@@ -37,7 +37,7 @@ export const getAppTheme = ({ isActive = false }) => {
         <div class="u2n-nav-popup-content">
           <h2 class="u2n-nav-popup-title">${IconThemes} <span>Theme</span></h2>
           <div>
-            <h3>Colors</h3>
+            <h3>Color</h3>
             <ul class="grid-2">
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
@@ -50,7 +50,7 @@ export const getAppTheme = ({ isActive = false }) => {
             </ul>
           </div>
           <div>
-            <h3>Names</h3>
+            <h3>Display name</h3>
             <ul class="grid-2">
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({

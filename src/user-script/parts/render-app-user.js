@@ -33,10 +33,24 @@ export const getAppUser = ({ isActive = false }) => {
     label: 'Edit display name',
     placeholder: displayName,
     value: displayName,
+    name: username,
     idButton: 'user-save-name',
     idInput: 'user-value-name',
   })}
         </div>
       </div>`}
     </div>`;
+};
+
+window.U2N.ui.eventsSubscribers.displayNameUpdate = {
+  selector: '#user-save-name',
+  handleClick: (_, calledByElement) => {
+    if (calledByElement) {
+      const inputElement = document.getElementById('user-value-name');
+      const username = inputElement.getAttribute('name');
+      const displayName = inputElement.value;
+
+      saveDisplayNameForUsername(username, displayName);
+    }
+  },
 };
