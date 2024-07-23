@@ -89,7 +89,7 @@ const initU2N = async () => {
   window.U2N.cache.inited = true;
 
   try {
-    const updateStatus = ({ type = '', text = '' }) => {
+    const updateStatus = ({ type = '', text = '', durationInSeconds = 4 }) => {
   if (window.U2N.cache.status) {
     clearTimeout(window.U2N.cache.status);
   }
@@ -99,7 +99,7 @@ const initU2N = async () => {
     text,
   };
 
-  renderApp();
+  renderStatus();
 
   window.U2N.cache.status = setTimeout(() => {
     window.U2N.ui.status = {
@@ -107,8 +107,8 @@ const initU2N = async () => {
       text: '',
     };
 
-    renderApp();
-  }, 3500);
+    renderStatus();
+  }, durationInSeconds * 1000);
 };
 
 const saveNewUsers = (usersByNumber = {}, params = {}) => {
@@ -447,70 +447,7 @@ window.U2N.ui.eventsSubscribers.removeAllUsers = {
   handleClick: resetUsers,
 };
 
-    appendCSS(`
-  .u2n-nav-status {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 0 10px;
-    margin-right: 10px;
-    border-top-right-radius: var(--u2n-nav-item-radius);
-    border-color: var(--fgColor-success);
-    color: var(--fgColor-default);
-    font-size: 12px;
-    transform: translateY(150px);
-    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
-  }
-
-  @keyframes U2NSlideInFromTop {
-    0% {
-      transform: translateY(150px);
-    }
-    100% {
-      transform: translateY(0);
-    }
-  }
-
-  .u2n-nav-status + * {
-    border-top-left-radius: var(--u2n-nav-item-radius);
-  }
-
-  .u2n-nav-status svg {
-    fill: currentColor;
-    color: var(--fgColor-success);
-    height: 14px;
-    width: 14px;
-  }
-
-  .u2n-nav-status--danger svg {
-    color: var(--fgColor-danger);
-  }
-`, { sourceName: 'render-app-status' });
-
-const StatusIconByType = {
-  'users-update': IconNewUser,
-  'users-reset': IconRemoveUsers,
-};
-
-const getAppStatus = () => {
-  const {
-    type,
-    text: statusText = '',
-  } = window.U2N.ui.status;
-
-  if (!statusText) {
-    return '';
-  }
-
-  const Icon = StatusIconByType[type] || '';
-  const isNegative = ['users-reset'].includes(type);
-
-  return `<span class="u2n-nav-status ${isNegative ? 'u2n-nav-status--danger' : ''}">
-    ${Icon} <span>${statusText}</span>
-  </span>`;
-};
-
+    /* import @/render-app-status.js */
     const themeSettings = {
   colors: [{
     label: 'Light',
@@ -832,7 +769,6 @@ const renderApp = () => {
   const content = window.U2N.ui.openedContent;
 
   render(`<aside class="u2n-nav" data-active="${content}">
-    ${getAppStatus()}
     ${getAppUser({ isActive: content === 'user' })}
     ${getAppTheme({ isActive: content === 'theme' })}
     ${getAppSettings({ isActive: content === 'settings' })}
@@ -855,6 +791,75 @@ window.U2N.ui.eventsSubscribers.content = {
 
     renderApp();
   },
+};
+
+    appendCSS(`
+  .u2n-nav-status {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    right: 170px;
+    height: var(--u2n-nav-item-size);
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0 10px;
+    margin-right: 10px;
+    border-top-left-radius: var(--u2n-nav-item-radius);
+    border-top-right-radius: var(--u2n-nav-item-radius);
+    border-color: var(--fgColor-success);
+    color: var(--fgColor-default);
+    font-size: 12px;
+    transform: translateY(60px);
+    animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
+  }
+
+  @keyframes U2NSlideInFromTop {
+    0% {
+      transform: translateY(60px);
+    }
+    100% {
+      transform: translateY(0);
+    }
+  }
+
+  .u2n-nav-status svg {
+    fill: currentColor;
+    color: var(--fgColor-success);
+    height: 14px;
+    width: 14px;
+  }
+
+  .u2n-nav-status--danger svg {
+    color: var(--fgColor-danger);
+  }
+`, { sourceName: 'render-app-status' });
+
+const StatusIconByType = {
+  'users-update': IconNewUser,
+  'users-reset': IconRemoveUsers,
+};
+
+const renderStatus = () => {
+  const {
+    type,
+    text: statusText = '',
+  } = window.U2N.ui.status;
+
+  if (!statusText) {
+    render('', 'u2n-status');
+
+    return;
+  }
+
+  const Icon = StatusIconByType[type] || '';
+  const isNegative = ['users-reset'].includes(type);
+
+  render(`<span class="u2n-nav-status ${isNegative ? 'u2n-nav-status--danger' : ''}">
+  ${Icon} <span>${statusText}</span>
+</span>`, 'u2n-status');
 };
 
     const getUserElements = () => {
@@ -1087,6 +1092,7 @@ const saveNewUsersIfPossible = () => {
 
     saveNewUsersIfPossible();
     rerenderOnContentChange();
+    renderStatus();
     renderApp();
 
     try {

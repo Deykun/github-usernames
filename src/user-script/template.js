@@ -60,12 +60,14 @@ const initU2N = async () => {
     /* import @/render-app-theme.js */
     /* import @/render-app-user.js */
     /* import @/render-app.js */
+    /* import @/render-status.js */
     /* import @/render-users.js */
     /* import @/render.js */
     /* import @/save-users.js */
 
     saveNewUsersIfPossible();
     rerenderOnContentChange();
+    renderStatus();
     renderApp();
 
     /* import @/subscribers.js */

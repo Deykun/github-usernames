@@ -172,7 +172,6 @@ export const renderApp = () => {
   const content = window.U2N.ui.openedContent;
 
   render(`<aside class="u2n-nav" data-active="${content}">
-    ${getAppStatus()}
     ${getAppUser({ isActive: content === 'user' })}
     ${getAppTheme({ isActive: content === 'theme' })}
     ${getAppSettings({ isActive: content === 'settings' })}

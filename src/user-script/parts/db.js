@@ -1,4 +1,4 @@
-const updateStatus = ({ type = '', text = '' }) => {
+const updateStatus = ({ type = '', text = '', durationInSeconds = 4 }) => {
   if (window.U2N.cache.status) {
     clearTimeout(window.U2N.cache.status);
   }
@@ -8,7 +8,7 @@ const updateStatus = ({ type = '', text = '' }) => {
     text,
   };
 
-  renderApp();
+  renderStatus();
 
   window.U2N.cache.status = setTimeout(() => {
     window.U2N.ui.status = {
@@ -16,8 +16,8 @@ const updateStatus = ({ type = '', text = '' }) => {
       text: '',
     };
 
-    renderApp();
-  }, 3500);
+    renderStatus();
+  }, durationInSeconds * 1000);
 };
 
 const saveNewUsers = (usersByNumber = {}, params = {}) => {
