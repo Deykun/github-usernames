@@ -91,6 +91,29 @@ const saveDisplayNameForUsername = (username, name) => {
   return true;
 };
 
+const saveSetting = (settingName, value, params) => {
+  const acceptedSettingsNames = Object.keys(defaultSettings);
+  if (!acceptedSettingsNames.includes(settingName)) {
+    return false;
+  }
+
+  const settings = getSettingsFromLS();
+
+  settings[settingName] = value;
+
+  window.U2N.settings = settings;
+  localStorage.setItem('u2n-settings', JSON.stringify(settings));
+
+  renderApp();
+  renderUsers();
+  updateStatus({
+    type: 'settings-update',
+    text: params?.customStatusText || 'A setting was updated.',
+  });
+
+  return true;
+};
+
 const resetUsers = () => {
   localStorage.removeItem('u2n-users');
   localStorage.removeItem('u2n-users-names');

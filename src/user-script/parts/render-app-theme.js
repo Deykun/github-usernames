@@ -42,7 +42,7 @@ export const getAppTheme = ({ isActive = false }) => {
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
     name: 'color',
-    id: `theme-color-${value}`,
+    idInput: `theme-color-${value}`,
     label,
     value,
     isChecked: settings.color === value,
@@ -55,7 +55,7 @@ export const getAppTheme = ({ isActive = false }) => {
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({
     name: 'names',
-    id: `theme-names-${value}`,
+    idInput: `theme-names-${value}`,
     label,
     value,
     isChecked: settings.name === value,
@@ -65,7 +65,7 @@ export const getAppTheme = ({ isActive = false }) => {
           <div>
             <h3>Other</h3>
             ${getCheckbox({
-    id: 'settings-should-show-avatar',
+    idInput: 'settings-should-show-avatar',
     label: 'should show avatars',
     isChecked: settings.shouldShowAvatars,
   })}
