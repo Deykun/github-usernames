@@ -23,15 +23,16 @@ appendCSS(`
 `, { sourceName: 'interface-text-input' });
 
 const getTextInput = ({
-  idInput, idButton, label, name, value = '', placeholder,
+  idInput, idButton, label, name, value = '', placeholder, isDisabled = false,
 }) => {
   return `<div class="u2n-text-input-wrapper">
     <input
       id="${idInput}"
       type="text"
-      ${name ? `name="${name}"` : ''}
+      ${name ? ` name="${name}" ` : ''}
       value="${value}"
       placeholder="${placeholder}"
+      ${isDisabled ? ' disabled ' : ''}
     />
     ${label ? `<label>${label}</label>` : ''}
     <button id="${idButton}" class="u2n-nav-popup-button" title="Save">

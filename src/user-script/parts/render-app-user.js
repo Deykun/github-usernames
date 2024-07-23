@@ -49,7 +49,11 @@ export const getAppUser = ({ isActive = false }) => {
     name: username,
     idButton: 'user-save-name',
     idInput: 'user-value-name',
+    isDisabled: getShouldUseUsernameAsDisplayname(username),
   })}
+        ${getShouldUseUsernameAsDisplayname(username)
+    ? '<small class="u2n-nav-popup-footer">This user is excluded by a string in the Settings tab.</small>'
+    : ''}
         </div>
       </div>`}
     </div>`;
@@ -57,13 +61,11 @@ export const getAppUser = ({ isActive = false }) => {
 
 window.U2N.ui.eventsSubscribers.displayNameUpdate = {
   selector: '#user-save-name',
-  handleClick: (_, calledByElement) => {
-    if (calledByElement) {
-      const inputElement = document.getElementById('user-value-name');
-      const username = inputElement.getAttribute('name');
-      const displayName = inputElement.value;
+  handleClick: () => {
+    const inputElement = document.getElementById('user-value-name');
+    const username = inputElement.getAttribute('name');
+    const displayName = inputElement.value;
 
-      saveDisplayNameForUsername(username, displayName);
-    }
+    saveDisplayNameForUsername(username, displayName);
   },
 };

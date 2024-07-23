@@ -15,6 +15,7 @@ appendCSS(`
 
   .u2n-nav-popup-footer {
     margin-top: -10px;
+    font-size: 10px;
     color: var(--u2n-nav-item-text);
     text-align: right;
   }
@@ -39,8 +40,8 @@ export const getAppSettings = ({ isActive = false }) => {
           </div>
           <br />
           ${getCheckbox({
-    id: 'settings-should-use-substring',
-    label: 'only use names from profiles when their username contains the specified string',
+    idInput: 'settings-should-use-substring',
+    label: 'only use names from profiles when their username contains the specified string (use a comma for multiple)',
     isChecked: settings.shouldFilterBySubstring,
   })}
           ${getTextInput({
@@ -66,4 +67,20 @@ export const getAppSettings = ({ isActive = false }) => {
 window.U2N.ui.eventsSubscribers.removeAllUsers = {
   selector: '#u2n-remove-all-users',
   handleClick: resetUsers,
+};
+
+window.U2N.ui.eventsSubscribers.shouldFilterBySubstring = {
+  selector: '#settings-should-use-substring',
+  handleClick: (_, calledByElement) => {
+    saveSetting('shouldFilterBySubstring', calledByElement.checked);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.filterSubstring = {
+  selector: '#settings-save-substring',
+  handleClick: () => {
+    const value = document.getElementById('settings-value-substring')?.value || '';
+
+    saveSetting('filterSubstring', value);
+  },
 };

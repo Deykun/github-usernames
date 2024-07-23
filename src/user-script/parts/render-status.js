@@ -45,6 +45,7 @@ appendCSS(`
 const StatusIconByType = {
   'users-update': IconNewUser,
   'users-reset': IconRemoveUsers,
+  'settings-update': IconWrench,
 };
 
 export const renderStatus = () => {
