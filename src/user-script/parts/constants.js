@@ -14,7 +14,7 @@ const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 
 window.U2N = {
-  version: 0.9,
+  version: 'SCRIPT_VERSION',
   isDevMode: true,
   cache: {
     HTML: {},

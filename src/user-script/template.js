@@ -3,7 +3,7 @@
 // @name            Usernames to names - GitHub
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
-// @version         0.9
+// @version         SCRIPT_VERSION
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start

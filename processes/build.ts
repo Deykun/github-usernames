@@ -1,6 +1,6 @@
 import chalk from 'chalk'
 import fs from 'fs';
-
+import scriptPackage from '../package.json'
 
 console.log()
 console.log(chalk.green("Building..."));
@@ -34,6 +34,7 @@ partPaths.forEach((path) => {
   }
 })
 
+template = template.replaceAll('SCRIPT_VERSION', `${scriptPackage?.version}`);
 console.log()
 console.log(chalk.green("Saving..."));
 console.log()

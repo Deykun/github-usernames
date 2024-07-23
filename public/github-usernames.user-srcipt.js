@@ -3,7 +3,7 @@
 // @name            Usernames to names - GitHub
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
-// @version         0.9
+// @version         0.9.0
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
@@ -29,7 +29,7 @@ const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 
 window.U2N = {
-  version: 0.9,
+  version: '0.9.0',
   isDevMode: true,
   cache: {
     HTML: {},
@@ -398,6 +398,12 @@ const getRadiobox = (params) => {
     padding: 0;
     font-size: 12px;
   }
+
+  .u2n-nav-popup-footer {
+    margin-top: -10px;
+    color: var(--u2n-nav-item-text);
+    text-align: right;
+  }
 `, { sourceName: 'render-app-settings' });
 
 const getAppSettings = ({ isActive = false }) => {
@@ -437,6 +443,7 @@ const getAppSettings = ({ isActive = false }) => {
           <a class="u2n-nav-popup-button u2n-nav-popup-button--github" href="https://github.com/Deykun/github-usernames" target="_blank">
             ${IconGithub} <span>deykun / github-usernames</span>
           </a>
+          <small class="u2n-nav-popup-footer">Version ${window.U2N.version}</small>
         </div>
       </div>`}
     </div>`;
@@ -682,13 +689,13 @@ window.U2N.ui.eventsSubscribers.displayNameUpdate = {
   .u2n-nav-popup-content {
     display: flex;
     flex-flow: column;
-    gap: 15px;
+    gap: 18px;
     max-height: calc(100vh - 60px);
     overflow: auto;
     padding: 10px;
     padding-top: 0;
     font-size: 12px;
-    line-height: 1.2;
+    line-height: 1.3;
     text-align: left;
   }
 

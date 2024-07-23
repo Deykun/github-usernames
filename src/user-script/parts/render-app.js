@@ -85,13 +85,13 @@ appendCSS(`
   .u2n-nav-popup-content {
     display: flex;
     flex-flow: column;
-    gap: 15px;
+    gap: 18px;
     max-height: calc(100vh - 60px);
     overflow: auto;
     padding: 10px;
     padding-top: 0;
     font-size: 12px;
-    line-height: 1.2;
+    line-height: 1.3;
     text-align: left;
   }
 
