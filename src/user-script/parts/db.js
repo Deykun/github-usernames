@@ -21,9 +21,7 @@ const updateStatus = ({ type = '', text = '' }) => {
 };
 
 const saveNewUsers = (usersByNumber = {}, params = {}) => {
-  const oldUserByUsernames = localStorage.getItem('u2n-users')
-    ? JSON.parse(localStorage.getItem('u2n-users'))
-    : {};
+  const oldUserByUsernames = getUsersByUsernamesFromLS();
 
   const newUserByUsernames = Object.entries(usersByNumber).reduce((stack, [username, value]) => {
     const isValidUsername = username && !username.includes(' ');

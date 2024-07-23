@@ -1,3 +1,11 @@
+const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(key)
+  ? { ...defaultValues, ...JSON.parse(localStorage.getItem(key)) }
+  : { ...defaultValues });
+
+const getSettingsFromLS = () => getFromLocalStorage('u2n-settings', {});
+const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
+const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
+
 window.U2N = {
   version: 0.9,
   isDevMode: true,
@@ -8,7 +16,9 @@ window.U2N = {
     status: null,
     location: location.href,
   },
-  usersByUsernames: localStorage.getItem('u2n-users') ? JSON.parse(localStorage.getItem('u2n-users')) : {},
+  settings: getSettingsFromLS(),
+  usersByUsernames: getUsersByUsernamesFromLS(),
+  customNamesByUsernames: getCustomNamesByUsernamesFromLS(),
   actions: {},
 };
 
