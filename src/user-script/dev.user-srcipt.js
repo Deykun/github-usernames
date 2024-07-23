@@ -4,7 +4,7 @@
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
 // @version         2.0
-// @include         https://*github.com*
+// @include         https://github.com*
 // @grant           none
 // @run-at          document-start
 // @updateURL       http://localhost:1234/server.user-script.js

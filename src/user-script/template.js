@@ -4,7 +4,7 @@
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
 // @version         0.9
-// @include         https://*github.com*
+// @include         https://github.com*
 // @grant           none
 // @run-at          document-start
 // @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
@@ -54,6 +54,7 @@ const initU2N = async () => {
     /* import @/dom.js */
     /* import @/helpers.js */
     /* import @/icons.js */
+    /* import @/interface.js */
     /* import @/render-app-settings.js */
     /* import @/render-app-status.js */
     /* import @/render-app-theme.js */

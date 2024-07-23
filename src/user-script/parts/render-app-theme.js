@@ -1,73 +1,74 @@
+const themeSettings = {
+  colors: [{
+    label: 'Light',
+    value: 'light',
+  },
+  {
+    label: 'Dark',
+    value: 'dark',
+  }],
+  names: [
+    {
+      label: 'Dwight Schrute',
+      value: 'name-surname',
+    },
+    {
+      label: 'Dwight S.',
+      value: 'name-s',
+    },
+    {
+      label: 'Dwight',
+      value: 'name',
+    },
+    {
+      label: 'D. Schrute',
+      value: 'n-surname',
+    }],
+};
+
 export const getAppTheme = ({ isActive = false }) => {
-  return `<div class="u2u-nav-button-wrapper">
+  const { settings } = window.U2N;
+
+  return `<div class="u2n-nav-button-wrapper">
       ${!isActive
-    ? `<button class="u2u-nav-button" data-content="theme">${IconThemes}</button>`
-    : `<button class="u2u-nav-button u2u-nav-button--active" data-content="">${IconThemes}</button>
-      <div class="u2u-nav-popup">
-        <div class="u2u-nav-popup-content">
-          <h2 class="u2u-nav-popup-title">${IconThemes} <span>Theme</span></h2>
+    ? `<button class="u2n-nav-button" data-content="theme">${IconThemes}</button>`
+    : `<button class="u2n-nav-button u2n-nav-button--active" data-content="">${IconThemes}</button>
+      <div class="u2n-nav-popup">
+        <div class="u2n-nav-popup-content">
+          <h2 class="u2n-nav-popup-title">${IconThemes} <span>Theme</span></h2>
           <div>
-            <h4>Colors</h4>
-            <ul>
-              <li>
-                <label>
-                  <input type="radio" name="color" value="light" />
-                  <span>Light</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="color" value="dark" />
-                  <span>Dark</span>
-                </label>
-              </li>
+            <h3>Colors</h3>
+            <ul class="grid-2">
+              ${themeSettings.colors.map(({ label, value }) => `<li>
+              ${getRadiobox({
+    name: 'color',
+    id: `theme-color-${value}`,
+    label,
+    value,
+    isChecked: settings.color === value,
+  })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Tags</h4>
-            <ul>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight Schrute</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight S.</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>Dwight</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="radio" name="users" value="light" />
-                  <span>D. Schrute</span>
-                </label>
-              </li>
+            <h3>Names</h3>
+            <ul class="grid-2">
+            ${themeSettings.names.map(({ label, value }) => `<li>
+            ${getRadiobox({
+    name: 'names',
+    id: `theme-names-${value}`,
+    label,
+    value,
+    isChecked: settings.name === value,
+  })}</li>`).join('')}
             </ul>
           </div>
           <div>
-            <h4>Other</h4>
-            <ul>
-              <li>
-                <label>
-                  <input type="checkbox" name="avatar" />
-                  <span>show avatars</span>
-                </label>
-              </li>
-              <li>
-                <label>
-                  <input type="checkbox" name="avatar" />
-                  <span>capitalize only the first letters</span>
-                </label>
-              </li>
-            </ul>
+            <h3>Other</h3>
+            ${getCheckbox({
+    id: 'settings-should-show-avatar',
+    label: 'should show avatars',
+    isChecked: settings.shouldShowAvatars,
+  })}
           </div>
         </div>
       </div>`}

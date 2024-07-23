@@ -1,12 +1,12 @@
 appendCSS(`
-  .u2u-nav-status {
+  .u2n-nav-status {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 10px;
     padding: 0 10px;
     margin-right: 10px;
-    border-top-right-radius: var(--u2u-nav-item-radius);
+    border-top-right-radius: var(--u2n-nav-item-radius);
     border-color: var(--fgColor-success);
     color: var(--fgColor-default);
     font-size: 12px;
@@ -23,18 +23,18 @@ appendCSS(`
     }
   }
 
-  .u2u-nav-status + * {
-    border-top-left-radius: var(--u2u-nav-item-radius);
+  .u2n-nav-status + * {
+    border-top-left-radius: var(--u2n-nav-item-radius);
   }
 
-  .u2u-nav-status svg {
+  .u2n-nav-status svg {
     fill: currentColor;
     color: var(--fgColor-success);
     height: 14px;
     width: 14px;
   }
 
-  .u2u-nav-status--danger svg {
+  .u2n-nav-status--danger svg {
     color: var(--fgColor-danger);
   }
 `, { sourceName: 'render-app-status' });
@@ -57,7 +57,7 @@ export const getAppStatus = () => {
   const Icon = StatusIconByType[type] || '';
   const isNegative = ['users-reset'].includes(type);
 
-  return `<span class="u2u-nav-status ${isNegative ? 'u2u-nav-status--danger' : ''}">
+  return `<span class="u2n-nav-status ${isNegative ? 'u2n-nav-status--danger' : ''}">
     ${Icon} <span>${statusText}</span>
   </span>`;
 };
