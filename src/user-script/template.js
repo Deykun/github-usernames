@@ -3,7 +3,7 @@
 // @name            Usernames to names - GitHub
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
-// @version         0.9
+// @version         SCRIPT_VERSION
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
@@ -60,12 +60,14 @@ const initU2N = async () => {
     /* import @/render-app-theme.js */
     /* import @/render-app-user.js */
     /* import @/render-app.js */
+    /* import @/render-status.js */
     /* import @/render-users.js */
     /* import @/render.js */
     /* import @/save-users.js */
 
     saveNewUsersIfPossible();
     rerenderOnContentChange();
+    renderStatus();
     renderApp();
 
     /* import @/subscribers.js */

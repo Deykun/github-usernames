@@ -12,6 +12,12 @@ appendCSS(`
     padding: 0;
     font-size: 12px;
   }
+
+  .u2n-nav-popup-footer {
+    margin-top: -10px;
+    color: var(--u2n-nav-item-text);
+    text-align: right;
+  }
 `, { sourceName: 'render-app-settings' });
 
 export const getAppSettings = ({ isActive = false }) => {
@@ -51,6 +57,7 @@ export const getAppSettings = ({ isActive = false }) => {
           <a class="u2n-nav-popup-button u2n-nav-popup-button--github" href="https://github.com/Deykun/github-usernames" target="_blank">
             ${IconGithub} <span>deykun / github-usernames</span>
           </a>
+          <small class="u2n-nav-popup-footer">Version ${window.U2N.version}</small>
         </div>
       </div>`}
     </div>`;
