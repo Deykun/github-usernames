@@ -27,7 +27,7 @@ const getTextInput = ({
 }) => {
   return `<div class="u2n-text-input-wrapper">
     <input
-      id="${idInput}"
+      ${idInput ? ` id="${idInput}" ` : ''}
       type="text"
       ${name ? ` name="${name}" ` : ''}
       value="${value}"
@@ -56,13 +56,14 @@ appendCSS(`
 `, { sourceName: 'interface-value' });
 
 const getCheckbox = ({
-  idInput, label, name, value, isChecked = false, type = 'checkbox',
+  idInput, classNameInput, label, name, value, isChecked = false, type = 'checkbox',
 }) => {
   return `<label class="u2n-checkbox-wrapper">
     <span>
       <input
         type="${type}"
-        id="${idInput}"
+        ${idInput ? ` id="${idInput}" ` : ''}
+        ${classNameInput ? ` class="${classNameInput}" ` : ''}
         name="${name}"
         ${value ? `value="${value}"` : ''}
         ${isChecked ? ' checked' : ''}

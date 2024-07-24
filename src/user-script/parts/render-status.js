@@ -3,7 +3,7 @@ appendCSS(`
     display: flex;
     position: fixed;
     bottom: 0;
-    right: 170px;
+    left: 50%;
     height: var(--u2n-nav-item-size);
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
     display: inline-flex;
@@ -14,19 +14,18 @@ appendCSS(`
     margin-right: 10px;
     border-top-left-radius: var(--u2n-nav-item-radius);
     border-top-right-radius: var(--u2n-nav-item-radius);
-    border-color: var(--fgColor-success);
     color: var(--fgColor-default);
     font-size: 12px;
-    transform: translateY(60px);
+    transform: translateY(60px) translateX(-50%);
     animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
   }
 
   @keyframes U2NSlideInFromTop {
     0% {
-      transform: translateY(60px);
+      transform: translateY(60px) translateX(-50%);
     }
     100% {
-      transform: translateY(0);
+      transform: translateY(0) translateX(-50%);
     }
   }
 

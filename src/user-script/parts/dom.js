@@ -21,7 +21,7 @@ export const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerenderOnContentChange if HTML is the same */
+    /* Don't rerender if HTML is the same */
     return;
   }
 
@@ -49,4 +49,12 @@ export const render = (HTML = '', source) => {
   el.innerHTML = HTML;
 
   document.body.appendChild(el);
+};
+
+const nestedSelectors = (selectors, subcontents) => {
+  return subcontents.map(([subselector, content]) => {
+    return `${selectors.map((selector) => `${selector} ${subselector}`).join(', ')} {
+      ${content}
+    }`;
+  }).join(' ');
 };

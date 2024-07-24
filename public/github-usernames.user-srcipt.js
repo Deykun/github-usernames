@@ -139,6 +139,10 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
     text: params.customStatusText || "The users' data were updated.",
   });
 
+  if (window.U2N.ui.openedContent === 'settings') {
+    renderApp();
+  }
+
   return true;
 };
 
@@ -212,6 +216,7 @@ const resetUsers = () => {
   window.U2N.usersByUsernames = {};
   window.U2N.customNamesByUsernames = {};
   renderUsers();
+  renderApp();
   updateStatus({
     type: 'users-reset',
     text: "The users' data were removed.",
@@ -241,7 +246,7 @@ const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerenderOnContentChange if HTML is the same */
+    /* Don't rerender if HTML is the same */
     return;
   }
 
@@ -269,6 +274,14 @@ const render = (HTML = '', source) => {
   el.innerHTML = HTML;
 
   document.body.appendChild(el);
+};
+
+const nestedSelectors = (selectors, subcontents) => {
+  return subcontents.map(([subselector, content]) => {
+    return `${selectors.map((selector) => `${selector} ${subselector}`).join(', ')} {
+      ${content}
+    }`;
+  }).join(' ');
 };
 
     const debounce = (fn, time) => {
@@ -315,14 +328,35 @@ const getDisplayNameByUsername = (username) => {
     return customDisplayName;
   }
 
-  let displayName = user ? user?.username : username;
-  if (user?.name) {
-    const [firstName, ...rest] = user.name.toLowerCase().split(' ');
-
-    displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+  if (!user?.name) {
+    return username;
   }
 
-  return displayName;
+  const {
+    name,
+  } = window.U2N.settings;
+
+  const subnames = user.name.toLowerCase().split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+
+  if (name === 'name-surname') {
+    return subnames.join(' ');
+  }
+
+  const [firstName, ...restOfNames] = subnames;
+
+  if (name === 'name-s') {
+    return [firstName, ...restOfNames.map((subname) => `${subname.at(0)}.`)].join(' ');
+  }
+
+  if (name === 'name') {
+    return firstName;
+  }
+
+  const [lastName, ...firstNamesReversed] = subnames.reverse();
+  const firstNames = firstNamesReversed.reverse();
+
+  // n-surname
+  return [firstNames.map((subname) => `${subname.at(0)}.`), lastName].join(' ');
 };
 
     /*
@@ -331,12 +365,6 @@ const getDisplayNameByUsername = (username) => {
 
 const IconCog = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M24 14.187V9.813c-2.148-.766-2.726-.802-3.027-1.529-.303-.729.083-1.169 1.059-3.223l-3.093-3.093c-2.026.963-2.488 1.364-3.224 1.059-.727-.302-.768-.889-1.527-3.027H9.813c-.764 2.144-.8 2.725-1.529 3.027-.752.313-1.203-.1-3.223-1.059L1.968 5.061c.977 2.055 1.362 2.493 1.059 3.224-.302.727-.881.764-3.027 1.528v4.375c2.139.76 2.725.8 3.027 1.528.304.734-.081 1.167-1.059 3.223l3.093 3.093c1.999-.95 2.47-1.373 3.223-1.059.728.302.764.88 1.529 3.027h4.374c.758-2.131.799-2.723 1.537-3.031.745-.308 1.186.099 3.215 1.062l3.093-3.093c-.975-2.05-1.362-2.492-1.059-3.223.3-.726.88-.763 3.027-1.528zm-4.875.764c-.577 1.394-.068 2.458.488 3.578l-1.084 1.084c-1.093-.543-2.161-1.076-3.573-.49-1.396.581-1.79 1.693-2.188 2.877h-1.534c-.398-1.185-.791-2.297-2.183-2.875-1.419-.588-2.507-.045-3.579.488l-1.083-1.084c.557-1.118 1.066-2.18.487-3.58-.579-1.391-1.691-1.784-2.876-2.182v-1.533c1.185-.398 2.297-.791 2.875-2.184.578-1.394.068-2.459-.488-3.579l1.084-1.084c1.082.538 2.162 1.077 3.58.488 1.392-.577 1.785-1.69 2.183-2.875h1.534c.398 1.185.792 2.297 2.184 2.875 1.419.588 2.506.045 3.579-.488l1.084 1.084c-.556 1.121-1.065 2.187-.488 3.58.577 1.391 1.689 1.784 2.875 2.183v1.534c-1.188.398-2.302.791-2.877 2.183zM12 9c1.654 0 3 1.346 3 3s-1.346 3-3 3-3-1.346-3-3 1.346-3 3-3zm0-2c-2.762 0-5 2.238-5 5s2.238 5 5 5 5-2.238 5-5-2.238-5-5-5z"/>
-</svg>`;
-const IconEye = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-<path d="M12.015 7c4.751 0 8.063 3.012 9.504 4.636C20.118 13.473 16.806 17 12.015 17c-4.42 0-7.93-3.536-9.478-5.407C4.03 9.946 7.354 7 12.015 7zm0-2C4.446 5 0 11.551 0 11.551S4.835 19 12.015 19C19.748 19 24 11.551 24 11.551S19.709 5 12.015 5zM12 8c-2.21 0-4 1.791-4 4s1.79 4 4 4c2.209 0 4-1.791 4-4s-1.791-4-4-4zm-.004 3.999c-.564.564-1.479.564-2.044 0s-.565-1.48 0-2.044c.564-.564 1.479-.564 2.044 0s.565 1.479 0 2.044z"/>
-</svg>`;
-const IconCheck = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-<path d="M9 22-1 11.402l2.798-2.859 7.149 7.473L22.091 2 25 4.806z"/>
 </svg>`;
 const IconGithub = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
 <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
@@ -389,7 +417,7 @@ const getTextInput = ({
 }) => {
   return `<div class="u2n-text-input-wrapper">
     <input
-      id="${idInput}"
+      ${idInput ? ` id="${idInput}" ` : ''}
       type="text"
       ${name ? ` name="${name}" ` : ''}
       value="${value}"
@@ -418,13 +446,14 @@ appendCSS(`
 `, { sourceName: 'interface-value' });
 
 const getCheckbox = ({
-  idInput, label, name, value, isChecked = false, type = 'checkbox',
+  idInput, classNameInput, label, name, value, isChecked = false, type = 'checkbox',
 }) => {
   return `<label class="u2n-checkbox-wrapper">
     <span>
       <input
         type="${type}"
-        id="${idInput}"
+        ${idInput ? ` id="${idInput}" ` : ''}
+        ${classNameInput ? ` class="${classNameInput}" ` : ''}
         name="${name}"
         ${value ? `value="${value}"` : ''}
         ${isChecked ? ' checked' : ''}
@@ -534,6 +563,14 @@ window.U2N.ui.eventsSubscribers.filterSubstring = {
   {
     label: 'Dark',
     value: 'dark',
+  },
+  {
+    label: 'Sky',
+    value: 'sky',
+  },
+  {
+    label: 'Grass',
+    value: 'grass',
   }],
   names: [
     {
@@ -570,7 +607,7 @@ const getAppTheme = ({ isActive = false }) => {
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
     name: 'color',
-    idInput: `theme-color-${value}`,
+    classNameInput: 'u2n-theme-color',
     label,
     value,
     isChecked: settings.color === value,
@@ -583,7 +620,7 @@ const getAppTheme = ({ isActive = false }) => {
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({
     name: 'names',
-    idInput: `theme-names-${value}`,
+    classNameInput: 'u2n-theme-name',
     label,
     value,
     isChecked: settings.name === value,
@@ -601,6 +638,27 @@ const getAppTheme = ({ isActive = false }) => {
         </div>
       </div>`}
     </div>`;
+};
+
+window.U2N.ui.eventsSubscribers.color = {
+  selector: '.u2n-theme-color',
+  handleClick: (_, calledByElement) => {
+    saveSetting('color', calledByElement.value);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.name = {
+  selector: '.u2n-theme-name',
+  handleClick: (_, calledByElement) => {
+    saveSetting('name', calledByElement.value);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.shouldShowAvatars = {
+  selector: '#settings-should-show-avatar',
+  handleClick: (_, calledByElement) => {
+    saveSetting('shouldShowAvatars', calledByElement.checked);
+  },
 };
 
     appendCSS(`
@@ -878,7 +936,7 @@ window.U2N.ui.eventsSubscribers.content = {
     display: flex;
     position: fixed;
     bottom: 0;
-    right: 170px;
+    left: 50%;
     height: var(--u2n-nav-item-size);
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
     display: inline-flex;
@@ -889,19 +947,18 @@ window.U2N.ui.eventsSubscribers.content = {
     margin-right: 10px;
     border-top-left-radius: var(--u2n-nav-item-radius);
     border-top-right-radius: var(--u2n-nav-item-radius);
-    border-color: var(--fgColor-success);
     color: var(--fgColor-default);
     font-size: 12px;
-    transform: translateY(60px);
+    transform: translateY(60px) translateX(-50%);
     animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
   }
 
   @keyframes U2NSlideInFromTop {
     0% {
-      transform: translateY(60px);
+      transform: translateY(60px) translateX(-50%);
     }
     100% {
-      transform: translateY(0);
+      transform: translateY(0) translateX(-50%);
     }
   }
 
@@ -961,8 +1018,38 @@ const renderStatus = () => {
 };
 
 appendCSS(` 
-  [data-u2n-display-name] {
+  :root {
+    --u2n-user-text: #00293e;
+    --u2n-user-bg: #f2f2f2;
+    --u2n-user-text--hover: #0054ae;
+    --u2n-user-bg--hover: #dbedff;
+  }
+
+  body[data-u2n-color="dark"] {
+    --u2n-user-text: white;
+    --u2n-user-bg: #26292e;
+    --u2n-user-text--hover: #dbedff;
+    --u2n-user-bg--hover: #142a42;
+  }
+
+  body[data-u2n-color="sky"] {
+    --u2n-user-text: #03113c;
+    --u2n-user-bg: #def3fa;
+    --u2n-user-text--hover: #000;
+    --u2n-user-bg--hover: #beedfc;
+  }
+
+  body[data-u2n-color="grass"] {
+    --u2n-user-text: #fff;
+    --u2n-user-bg: #163b13;
+    --u2n-user-text--hover: #b8ffb3;
+    --u2n-user-bg--hover: #30582d;
+  }
+
+  [data-u2n-cache-user] {
+    display: inline-block;
     font-size: 0;
+    text-overflow: unset !important;
   }
 
   .u2n-tag {
@@ -981,8 +1068,8 @@ appendCSS(`
     line-height: 19px;
     height: 18px;
     white-space: nowrap;
-    color: #00293e;
-    background-color: #f2f2f2;
+    color: var(--u2n-user-text) !important;
+    background-color: var(--u2n-user-bg) !important;
     transition: 0.15s ease-in-out; 
     position: relative;
   }
@@ -1004,31 +1091,55 @@ appendCSS(`
     aspect-ratio: 1 / 1;
   }
 
-  .u2n-tag img + * {
-    margin-left: 1.5em;
-  }
-
   .u2n-tag:hover {
-    color: #0054ae !important;
-    background: #dbedff !important;
+    color: var(--u2n-user-text--hover) !important;
+    background-color: var(--u2n-user-bg--hover) !important;
   }
 
+  /* We hide them and show them only in verified locations */
+  .u2n-tag-avatar {
+    display: none;
+  }
+
+  ${nestedSelectors([
+    '.gh-header', // pr header on pr site
+    '.u2n-nav-user-preview', // preview in user tab
+    '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
+    '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
+    '.timeline-comment-header', // comments headers
+    '.comment-body', // comments body
+  ], [
+    ['.u2n-tag-avatar', 'display: inline-block;'],
+    ['.u2n-tag-avatar + *', 'margin-left: 1.5em;'],
+  ])}
 `, { sourceName: 'render-users' });
 
 const renderUsers = () => {
   const elements = getUserElements();
+  const {
+    color,
+    shouldShowAvatars,
+  } = window.U2N.settings;
+
+  const shouldUpdateTheme = document.body.getAttribute('data-u2n-color') !== color;
+  if (shouldUpdateTheme) {
+    document.body.setAttribute('data-u2n-color', color);
+  }
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
 
-    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+    const cacheValue = `${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = el.getAttribute('data-u2n-cache-user') === cacheValue;
     if (isAlreadySet) {
       return;
     }
 
+    el.setAttribute('data-u2n-cache-user', cacheValue);
+
     el.querySelector('.u2n-tags-holder')?.remove();
-    el.setAttribute('data-u2n-display-name', displayName);
 
     const tagsHolderEl = document.createElement('span');
 
@@ -1044,20 +1155,12 @@ const renderUsers = () => {
 
     const avatarSrc = user?.avatarSrc || '';
 
-    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : IconEye}<span>${displayName}</span>`;
+    tagEl.innerHTML = `${shouldShowAvatars && avatarSrc ? `<img src="${user?.avatarSrc}" class="u2n-tag-avatar" />` : ''}<span>${displayName}</span>`;
 
     tagsHolderEl.append(tagEl);
 
     el.append(tagsHolderEl);
   });
-};
-
-    const rerenderOnContentChange = () => {
-  renderUsers();
-};
-
-const rerenderOnLocationChange = () => {
-  renderApp();
 };
 
     const getUserFromUserPageIfPossible = () => {
@@ -1172,7 +1275,7 @@ const saveNewUsersIfPossible = () => {
 
 
     saveNewUsersIfPossible();
-    rerenderOnContentChange();
+    renderUsers();
     renderStatus();
     renderApp();
 
@@ -1211,13 +1314,13 @@ const saveNewUsersIfPossible = () => {
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerenderOnContentChange();
+      renderUsers();
 
       const didLocationChange = location.href !== window.U2N.cache.location;
       if (didLocationChange) {
         window.U2N.cache.location = location.href;
 
-        rerenderOnLocationChange();
+        renderApp();
       }
     }, 500);
 

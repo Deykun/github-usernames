@@ -62,11 +62,10 @@ const initU2N = async () => {
     /* import @/render-app.js */
     /* import @/render-status.js */
     /* import @/render-users.js */
-    /* import @/render.js */
     /* import @/save-users.js */
 
     saveNewUsersIfPossible();
-    rerenderOnContentChange();
+    renderUsers();
     renderStatus();
     renderApp();
 
@@ -74,13 +73,13 @@ const initU2N = async () => {
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerenderOnContentChange();
+      renderUsers();
 
       const didLocationChange = location.href !== window.U2N.cache.location;
       if (didLocationChange) {
         window.U2N.cache.location = location.href;
 
-        rerenderOnLocationChange();
+        renderApp();
       }
     }, 500);
 

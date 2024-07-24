@@ -16,8 +16,38 @@ const getUserElements = () => {
 };
 
 appendCSS(` 
-  [data-u2n-display-name] {
+  :root {
+    --u2n-user-text: #00293e;
+    --u2n-user-bg: #f2f2f2;
+    --u2n-user-text--hover: #0054ae;
+    --u2n-user-bg--hover: #dbedff;
+  }
+
+  body[data-u2n-color="dark"] {
+    --u2n-user-text: white;
+    --u2n-user-bg: #26292e;
+    --u2n-user-text--hover: #dbedff;
+    --u2n-user-bg--hover: #142a42;
+  }
+
+  body[data-u2n-color="sky"] {
+    --u2n-user-text: #03113c;
+    --u2n-user-bg: #def3fa;
+    --u2n-user-text--hover: #000;
+    --u2n-user-bg--hover: #beedfc;
+  }
+
+  body[data-u2n-color="grass"] {
+    --u2n-user-text: #fff;
+    --u2n-user-bg: #163b13;
+    --u2n-user-text--hover: #b8ffb3;
+    --u2n-user-bg--hover: #30582d;
+  }
+
+  [data-u2n-cache-user] {
+    display: inline-block;
     font-size: 0;
+    text-overflow: unset !important;
   }
 
   .u2n-tag {
@@ -36,8 +66,8 @@ appendCSS(`
     line-height: 19px;
     height: 18px;
     white-space: nowrap;
-    color: #00293e;
-    background-color: #f2f2f2;
+    color: var(--u2n-user-text) !important;
+    background-color: var(--u2n-user-bg) !important;
     transition: 0.15s ease-in-out; 
     position: relative;
   }
@@ -59,31 +89,55 @@ appendCSS(`
     aspect-ratio: 1 / 1;
   }
 
-  .u2n-tag img + * {
-    margin-left: 1.5em;
-  }
-
   .u2n-tag:hover {
-    color: #0054ae !important;
-    background: #dbedff !important;
+    color: var(--u2n-user-text--hover) !important;
+    background-color: var(--u2n-user-bg--hover) !important;
   }
 
+  /* We hide them and show them only in verified locations */
+  .u2n-tag-avatar {
+    display: none;
+  }
+
+  ${nestedSelectors([
+    '.gh-header', // pr header on pr site
+    '.u2n-nav-user-preview', // preview in user tab
+    '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
+    '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
+    '.timeline-comment-header', // comments headers
+    '.comment-body', // comments body
+  ], [
+    ['.u2n-tag-avatar', 'display: inline-block;'],
+    ['.u2n-tag-avatar + *', 'margin-left: 1.5em;'],
+  ])}
 `, { sourceName: 'render-users' });
 
 export const renderUsers = () => {
   const elements = getUserElements();
+  const {
+    color,
+    shouldShowAvatars,
+  } = window.U2N.settings;
+
+  const shouldUpdateTheme = document.body.getAttribute('data-u2n-color') !== color;
+  if (shouldUpdateTheme) {
+    document.body.setAttribute('data-u2n-color', color);
+  }
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
 
-    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+    const cacheValue = `${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = el.getAttribute('data-u2n-cache-user') === cacheValue;
     if (isAlreadySet) {
       return;
     }
 
+    el.setAttribute('data-u2n-cache-user', cacheValue);
+
     el.querySelector('.u2n-tags-holder')?.remove();
-    el.setAttribute('data-u2n-display-name', displayName);
 
     const tagsHolderEl = document.createElement('span');
 
@@ -99,7 +153,7 @@ export const renderUsers = () => {
 
     const avatarSrc = user?.avatarSrc || '';
 
-    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : IconEye}<span>${displayName}</span>`;
+    tagEl.innerHTML = `${shouldShowAvatars && avatarSrc ? `<img src="${user?.avatarSrc}" class="u2n-tag-avatar" />` : ''}<span>${displayName}</span>`;
 
     tagsHolderEl.append(tagEl);
 

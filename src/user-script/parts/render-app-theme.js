@@ -6,6 +6,14 @@ const themeSettings = {
   {
     label: 'Dark',
     value: 'dark',
+  },
+  {
+    label: 'Sky',
+    value: 'sky',
+  },
+  {
+    label: 'Grass',
+    value: 'grass',
   }],
   names: [
     {
@@ -42,7 +50,7 @@ export const getAppTheme = ({ isActive = false }) => {
               ${themeSettings.colors.map(({ label, value }) => `<li>
               ${getRadiobox({
     name: 'color',
-    idInput: `theme-color-${value}`,
+    classNameInput: 'u2n-theme-color',
     label,
     value,
     isChecked: settings.color === value,
@@ -55,7 +63,7 @@ export const getAppTheme = ({ isActive = false }) => {
             ${themeSettings.names.map(({ label, value }) => `<li>
             ${getRadiobox({
     name: 'names',
-    idInput: `theme-names-${value}`,
+    classNameInput: 'u2n-theme-name',
     label,
     value,
     isChecked: settings.name === value,
@@ -73,4 +81,25 @@ export const getAppTheme = ({ isActive = false }) => {
         </div>
       </div>`}
     </div>`;
+};
+
+window.U2N.ui.eventsSubscribers.color = {
+  selector: '.u2n-theme-color',
+  handleClick: (_, calledByElement) => {
+    saveSetting('color', calledByElement.value);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.name = {
+  selector: '.u2n-theme-name',
+  handleClick: (_, calledByElement) => {
+    saveSetting('name', calledByElement.value);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.shouldShowAvatars = {
+  selector: '#settings-should-show-avatar',
+  handleClick: (_, calledByElement) => {
+    saveSetting('shouldShowAvatars', calledByElement.checked);
+  },
 };
