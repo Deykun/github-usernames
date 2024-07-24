@@ -16,7 +16,7 @@ const getUserElements = () => {
 };
 
 appendCSS(` 
-  [data-u2n-display-name] {
+  [data-u2n-cache-user] {
     font-size: 0;
   }
 
@@ -59,31 +59,48 @@ appendCSS(`
     aspect-ratio: 1 / 1;
   }
 
-  .u2n-tag img + * {
-    margin-left: 1.5em;
-  }
-
   .u2n-tag:hover {
     color: #0054ae !important;
     background: #dbedff !important;
   }
 
+  /* We hide them and show them only in verified locations */
+  .u2n-tag-avatar {
+    display: none;
+  }
+
+  ${nestedSelectors([
+    '.u2n-nav-user-preview', // preview in user tab
+    '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
+    '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
+    '.timeline-comment-header', // comments headers
+    '.comment-body', // comments body
+  ], [
+    ['.u2n-tag-avatar', 'display: inline-block;'],
+    ['.u2n-tag-avatar + *', 'margin-left: 1.5em;'],
+  ])}
 `, { sourceName: 'render-users' });
 
 export const renderUsers = () => {
   const elements = getUserElements();
+  const {
+    shouldShowAvatars,
+  } = window.U2N.settings;
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
 
-    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+    const cacheValue = `${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = el.getAttribute('data-u2n-cache-user') === cacheValue;
     if (isAlreadySet) {
       return;
     }
 
+    el.setAttribute('data-u2n-cache-user', cacheValue);
+
     el.querySelector('.u2n-tags-holder')?.remove();
-    el.setAttribute('data-u2n-display-name', displayName);
 
     const tagsHolderEl = document.createElement('span');
 
@@ -99,7 +116,7 @@ export const renderUsers = () => {
 
     const avatarSrc = user?.avatarSrc || '';
 
-    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : IconEye}<span>${displayName}</span>`;
+    tagEl.innerHTML = `${shouldShowAvatars && avatarSrc ? `<img src="${user?.avatarSrc}" class="u2n-tag-avatar" />` : ''}<span>${displayName}</span>`;
 
     tagsHolderEl.append(tagEl);
 

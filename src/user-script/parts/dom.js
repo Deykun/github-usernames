@@ -50,3 +50,11 @@ export const render = (HTML = '', source) => {
 
   document.body.appendChild(el);
 };
+
+const nestedSelectors = (selectors, subcontents) => {
+  return subcontents.map(([subselector, content]) => {
+    return `${selectors.map((selector) => `${selector} ${subselector}`).join(', ')} {
+      ${content}
+    }`;
+  }).join(' ');
+};

@@ -271,6 +271,14 @@ const render = (HTML = '', source) => {
   document.body.appendChild(el);
 };
 
+const nestedSelectors = (selectors, subcontents) => {
+  return subcontents.map(([subselector, content]) => {
+    return `${selectors.map((selector) => `${selector} ${subselector}`).join(', ')} {
+      ${content}
+    }`;
+  }).join(' ');
+};
+
     const debounce = (fn, time) => {
   let timeoutHandler;
 
@@ -315,36 +323,35 @@ const getDisplayNameByUsername = (username) => {
     return customDisplayName;
   }
 
-  let displayName = user ? user?.username : username;
-  if (user?.name) {
-    const {
-      name,
-    } = window.U2N.settings;
-
-    const subnames = user.name.toLowerCase().split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
-
-    if (name === 'name-surname') {
-      return subnames.join(' ');
-    }
-
-    const [firstName, ...restOfNames] = subnames;
-
-    if (name === 'name-s') {
-      return [firstName, ...restOfNames.map((subname) => `${subname.at(0)}.`)].join(' ');
-    }
-
-    if (name === 'name') {
-      return firstName;
-    }
-
-    const [lastName, ...firstNamesReversed] = subnames.reverse();
-    const firstNames = firstNamesReversed.reverse();
-
-    // n-surname
-    return [firstNames.map((subname) => `${subname.at(0)}.`), lastName].join(' ');
+  if (!user?.name) {
+    return username;
   }
 
-  return displayName;
+  const {
+    name,
+  } = window.U2N.settings;
+
+  const subnames = user.name.toLowerCase().split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+
+  if (name === 'name-surname') {
+    return subnames.join(' ');
+  }
+
+  const [firstName, ...restOfNames] = subnames;
+
+  if (name === 'name-s') {
+    return [firstName, ...restOfNames.map((subname) => `${subname.at(0)}.`)].join(' ');
+  }
+
+  if (name === 'name') {
+    return firstName;
+  }
+
+  const [lastName, ...firstNamesReversed] = subnames.reverse();
+  const firstNames = firstNamesReversed.reverse();
+
+  // n-surname
+  return [firstNames.map((subname) => `${subname.at(0)}.`), lastName].join(' ');
 };
 
     /*
@@ -1005,7 +1012,7 @@ const renderStatus = () => {
 };
 
 appendCSS(` 
-  [data-u2n-display-name] {
+  [data-u2n-cache-user] {
     font-size: 0;
   }
 
@@ -1048,31 +1055,48 @@ appendCSS(`
     aspect-ratio: 1 / 1;
   }
 
-  .u2n-tag img + * {
-    margin-left: 1.5em;
-  }
-
   .u2n-tag:hover {
     color: #0054ae !important;
     background: #dbedff !important;
   }
 
+  /* We hide them and show them only in verified locations */
+  .u2n-tag-avatar {
+    display: none;
+  }
+
+  ${nestedSelectors([
+    '.u2n-nav-user-preview', // preview in user tab
+    '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
+    '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
+    '.timeline-comment-header', // comments headers
+    '.comment-body', // comments body
+  ], [
+    ['.u2n-tag-avatar', 'display: inline-block;'],
+    ['.u2n-tag-avatar + *', 'margin-left: 1.5em;'],
+  ])}
 `, { sourceName: 'render-users' });
 
 const renderUsers = () => {
   const elements = getUserElements();
+  const {
+    shouldShowAvatars,
+  } = window.U2N.settings;
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
 
-    const isAlreadySet = el.getAttribute('data-u2n-display-name') === displayName;
+    const cacheValue = `${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = el.getAttribute('data-u2n-cache-user') === cacheValue;
     if (isAlreadySet) {
       return;
     }
 
+    el.setAttribute('data-u2n-cache-user', cacheValue);
+
     el.querySelector('.u2n-tags-holder')?.remove();
-    el.setAttribute('data-u2n-display-name', displayName);
 
     const tagsHolderEl = document.createElement('span');
 
@@ -1088,7 +1112,7 @@ const renderUsers = () => {
 
     const avatarSrc = user?.avatarSrc || '';
 
-    tagEl.innerHTML = `${avatarSrc ? `<img src="${user?.avatarSrc}" /> ` : IconEye}<span>${displayName}</span>`;
+    tagEl.innerHTML = `${shouldShowAvatars && avatarSrc ? `<img src="${user?.avatarSrc}" class="u2n-tag-avatar" />` : ''}<span>${displayName}</span>`;
 
     tagsHolderEl.append(tagEl);
 
@@ -1216,7 +1240,7 @@ const saveNewUsersIfPossible = () => {
 
 
     saveNewUsersIfPossible();
-    rerenderOnContentChange();
+    renderUsers();
     renderStatus();
     renderApp();
 
@@ -1255,7 +1279,7 @@ const saveNewUsersIfPossible = () => {
 
     const debouncedRefresh = debounce(() => {
       saveNewUsersIfPossible();
-      rerenderOnContentChange();
+      renderUsers();
 
       const didLocationChange = location.href !== window.U2N.cache.location;
       if (didLocationChange) {
