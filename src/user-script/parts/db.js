@@ -47,6 +47,10 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
     text: params.customStatusText || "The users' data were updated.",
   });
 
+  if (window.U2N.ui.openedContent === 'settings') {
+    renderApp();
+  }
+
   return true;
 };
 
@@ -120,6 +124,7 @@ const resetUsers = () => {
   window.U2N.usersByUsernames = {};
   window.U2N.customNamesByUsernames = {};
   renderUsers();
+  renderApp();
   updateStatus({
     type: 'users-reset',
     text: "The users' data were removed.",

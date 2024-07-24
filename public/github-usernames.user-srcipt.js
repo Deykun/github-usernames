@@ -139,6 +139,10 @@ const saveNewUsers = (usersByNumber = {}, params = {}) => {
     text: params.customStatusText || "The users' data were updated.",
   });
 
+  if (window.U2N.ui.openedContent === 'settings') {
+    renderApp();
+  }
+
   return true;
 };
 
@@ -212,6 +216,7 @@ const resetUsers = () => {
   window.U2N.usersByUsernames = {};
   window.U2N.customNamesByUsernames = {};
   renderUsers();
+  renderApp();
   updateStatus({
     type: 'users-reset',
     text: "The users' data were removed.",
@@ -564,6 +569,14 @@ window.U2N.ui.eventsSubscribers.filterSubstring = {
   {
     label: 'Dark',
     value: 'dark',
+  },
+  {
+    label: 'Sky',
+    value: 'sky',
+  },
+  {
+    label: 'Grass',
+    value: 'grass',
   }],
   names: [
     {
@@ -929,7 +942,7 @@ window.U2N.ui.eventsSubscribers.content = {
     display: flex;
     position: fixed;
     bottom: 0;
-    right: 170px;
+    left: 50%;
     height: var(--u2n-nav-item-size);
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.08));
     display: inline-flex;
@@ -940,19 +953,18 @@ window.U2N.ui.eventsSubscribers.content = {
     margin-right: 10px;
     border-top-left-radius: var(--u2n-nav-item-radius);
     border-top-right-radius: var(--u2n-nav-item-radius);
-    border-color: var(--fgColor-success);
     color: var(--fgColor-default);
     font-size: 12px;
-    transform: translateY(60px);
+    transform: translateY(60px) translateX(-50%);
     animation: U2NSlideInFromTop 0.4s cubic-bezier(0.1, 0.7, 1, 0.1) forwards;
   }
 
   @keyframes U2NSlideInFromTop {
     0% {
-      transform: translateY(60px);
+      transform: translateY(60px) translateX(-50%);
     }
     100% {
-      transform: translateY(0);
+      transform: translateY(0) translateX(-50%);
     }
   }
 
@@ -1012,7 +1024,36 @@ const renderStatus = () => {
 };
 
 appendCSS(` 
+  :root {
+    --u2n-user-text: #00293e;
+    --u2n-user-bg: #f2f2f2;
+    --u2n-user-text--hover: #0054ae;
+    --u2n-user-bg--hover: #dbedff;
+  }
+
+  body[data-u2n-color="dark"] {
+    --u2n-user-text: white;
+    --u2n-user-bg: #26292e;
+    --u2n-user-text--hover: #dbedff;
+    --u2n-user-bg--hover: #142a42;
+  }
+
+  body[data-u2n-color="sky"] {
+    --u2n-user-text: #03113c;
+    --u2n-user-bg: #def3fa;
+    --u2n-user-text--hover: #000;
+    --u2n-user-bg--hover: #beedfc;
+  }
+
+  body[data-u2n-color="grass"] {
+    --u2n-user-text: #fff;
+    --u2n-user-bg: #163b13;
+    --u2n-user-text--hover: #b8ffb3;
+    --u2n-user-bg--hover: #30582d;
+  }
+
   [data-u2n-cache-user] {
+    display: inline-block;
     font-size: 0;
   }
 
@@ -1032,8 +1073,8 @@ appendCSS(`
     line-height: 19px;
     height: 18px;
     white-space: nowrap;
-    color: #00293e;
-    background-color: #f2f2f2;
+    color: var(--u2n-user-text) !important;
+    background-color: var(--u2n-user-bg) !important;
     transition: 0.15s ease-in-out; 
     position: relative;
   }
@@ -1056,8 +1097,8 @@ appendCSS(`
   }
 
   .u2n-tag:hover {
-    color: #0054ae !important;
-    background: #dbedff !important;
+    color: var(--u2n-user-text--hover) !important;
+    background-color: var(--u2n-user-bg--hover) !important;
   }
 
   /* We hide them and show them only in verified locations */
@@ -1066,6 +1107,7 @@ appendCSS(`
   }
 
   ${nestedSelectors([
+    '.gh-header', // pr header on pr site
     '.u2n-nav-user-preview', // preview in user tab
     '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
     '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
@@ -1080,8 +1122,14 @@ appendCSS(`
 const renderUsers = () => {
   const elements = getUserElements();
   const {
+    color,
     shouldShowAvatars,
   } = window.U2N.settings;
+
+  const shouldUpdateTheme = document.body.getAttribute('data-u2n-color') !== color;
+  if (shouldUpdateTheme) {
+    document.body.setAttribute('data-u2n-color', color);
+  }
 
   elements.forEach(({ el, username }) => {
     const user = window.U2N.usersByUsernames?.[username];

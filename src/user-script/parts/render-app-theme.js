@@ -6,6 +6,14 @@ const themeSettings = {
   {
     label: 'Dark',
     value: 'dark',
+  },
+  {
+    label: 'Sky',
+    value: 'sky',
+  },
+  {
+    label: 'Grass',
+    value: 'grass',
   }],
   names: [
     {
