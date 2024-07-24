@@ -246,7 +246,7 @@ const render = (HTML = '', source) => {
   const id = `g-u2n-html-${source}`;
 
   if (HTML === window.U2N.cache.HTML[id]) {
-    /* Don't rerenderOnContentChange if HTML is the same */
+    /* Don't rerender if HTML is the same */
     return;
   }
 
@@ -1049,6 +1049,7 @@ appendCSS(`
   [data-u2n-cache-user] {
     display: inline-block;
     font-size: 0;
+    text-overflow: unset !important;
   }
 
   .u2n-tag {
@@ -1160,14 +1161,6 @@ const renderUsers = () => {
 
     el.append(tagsHolderEl);
   });
-};
-
-    const rerenderOnContentChange = () => {
-  renderUsers();
-};
-
-const rerenderOnLocationChange = () => {
-  renderApp();
 };
 
     const getUserFromUserPageIfPossible = () => {
@@ -1327,7 +1320,7 @@ const saveNewUsersIfPossible = () => {
       if (didLocationChange) {
         window.U2N.cache.location = location.href;
 
-        rerenderOnLocationChange();
+        renderApp();
       }
     }, 500);
 

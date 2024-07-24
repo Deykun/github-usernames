@@ -62,7 +62,6 @@ const initU2N = async () => {
     /* import @/render-app.js */
     /* import @/render-status.js */
     /* import @/render-users.js */
-    /* import @/render.js */
     /* import @/save-users.js */
 
     saveNewUsersIfPossible();
@@ -80,7 +79,7 @@ const initU2N = async () => {
       if (didLocationChange) {
         window.U2N.cache.location = location.href;
 
-        rerenderOnLocationChange();
+        renderApp();
       }
     }, 500);
 

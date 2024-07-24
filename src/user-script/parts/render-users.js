@@ -47,6 +47,7 @@ appendCSS(`
   [data-u2n-cache-user] {
     display: inline-block;
     font-size: 0;
+    text-overflow: unset !important;
   }
 
   .u2n-tag {
