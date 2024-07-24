@@ -44,9 +44,31 @@ export const getDisplayNameByUsername = (username) => {
 
   let displayName = user ? user?.username : username;
   if (user?.name) {
-    const [firstName, ...rest] = user.name.toLowerCase().split(' ');
+    const {
+      name,
+    } = window.U2N.settings;
 
-    displayName = `${upperCaseFirstLetter(firstName)} ${rest.map((nextName) => `${nextName.at(0).toUpperCase()}.`).join(' ')}`;
+    const subnames = user.name.toLowerCase().split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+
+    if (name === 'name-surname') {
+      return subnames.join(' ');
+    }
+
+    const [firstName, ...restOfNames] = subnames;
+
+    if (name === 'name-s') {
+      return [firstName, ...restOfNames.map((subname) => `${subname.at(0)}.`)].join(' ');
+    }
+
+    if (name === 'name') {
+      return firstName;
+    }
+
+    const [lastName, ...firstNamesReversed] = subnames.reverse();
+    const firstNames = firstNamesReversed.reverse();
+
+    // n-surname
+    return [firstNames.map((subname) => `${subname.at(0)}.`), lastName].join(' ');
   }
 
   return displayName;
