@@ -1,7 +1,7 @@
 // ==UserScript==
-// @namespace       deykun
 // @name            Dev - Usernames to names - GitHub
 // @description     Replace ambiguous usernames with actual names from user profiles.
+// @namespace       deykun
 // @author          deykun
 // @version         2.0
 // @include         https://github.com*

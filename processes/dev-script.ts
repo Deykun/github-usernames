@@ -26,7 +26,7 @@ userScriptApp.get('/dev.user-script.js', (req, res) => {
     console.log(chalk.green('Real script code has been served!'));
     console.log('');
 
-    const devScript = fs.readFileSync('public/github-usernames.user-srcipt.js', 'utf-8')
+    const devScript = fs.readFileSync('public/github-usernames.user.js', 'utf-8')
 
     res.send(devScript);
 });
