@@ -7,8 +7,8 @@
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
-// @updateURL       https://deykun.github.io/github-usernames/github-usernames.user-srcipt.js
-// @downloadURL     https://deykun.github.io/github-usernames/github-usernames.user-srcipt.js
+// @updateURL       https://deykun.github.io/github-usernames/github-usernames.user.js
+// @downloadURL     https://deykun.github.io/github-usernames/github-usernames.user.js
 // ==/UserScript==
 
 'use strict';
