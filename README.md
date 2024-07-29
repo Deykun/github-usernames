@@ -18,3 +18,11 @@ The script available here swaps usernames with preferred names from profiles ex.
   - You can check the code if you are worried about security: it doesn't touch tokens at all.
   - Manifest3 requires enabling development mode (as described on the page). Alternatively, you can use the Manifest2 version, which will work faster (M3 only trusts extensions with predefined scripts, but TM by design, allows any type of scripts to be added)
 2. Go to https://deykun.github.io/github-usernames/github-usernames.user.js
+
+![Instalation demo](docs/demo-install.gif)
+
+### Saving users names
+
+To add user data, hover over their username and wait for the card (script grabs the username from the visible card). **But,** that sounds like a lot of work! Right, go to your organization's people page, and it will read 30 users at once from there. :)
+
+To edit a user's display name, go to their profile page. You will have an additional option there.
