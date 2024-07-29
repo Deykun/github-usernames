@@ -31,8 +31,18 @@ const themeSettings = {
     {
       label: 'D. Schrute',
       value: 'n-surname',
+    },
+    {
+      label: 'DSchrute911 <span style="opacity: 0.5;">(github\'s default)</span>',
+      value: 'username',
     }],
 };
+
+appendCSS(`
+  .u2u-names-list li:last-child {
+    grid-column: 1 / 3;
+  }
+`, { sourceName: 'render-app-theme' });
 
 export const getAppTheme = ({ isActive = false }) => {
   const { settings } = window.U2N;
@@ -48,7 +58,7 @@ export const getAppTheme = ({ isActive = false }) => {
             <h3>Color</h3>
             <ul class="grid-2">
               ${themeSettings.colors.map(({ label, value }) => `<li>
-              ${getRadiobox({
+  ${getRadiobox({
     name: 'color',
     classNameInput: 'u2n-theme-color',
     label,
@@ -59,9 +69,9 @@ export const getAppTheme = ({ isActive = false }) => {
           </div>
           <div>
             <h3>Display name</h3>
-            <ul class="grid-2">
-            ${themeSettings.names.map(({ label, value }) => `<li>
-            ${getRadiobox({
+            <ul class="grid-2 u2u-names-list">
+            ${themeSettings.names.map(({ label, value }, index) => `<li>
+  ${getRadiobox({
     name: 'names',
     classNameInput: 'u2n-theme-name',
     label,
@@ -71,8 +81,13 @@ export const getAppTheme = ({ isActive = false }) => {
             </ul>
           </div>
           <div>
-            <h3>Other</h3>
-            ${getCheckbox({
+            <h3>Other</h3>       
+  ${getCheckbox({
+    idInput: 'settings-should-show-username-when-better',
+    label: 'should show the username when it fits better',
+    isChecked: settings.shouldShowUsernameWhenBetter,
+  })}
+  ${getCheckbox({
     idInput: 'settings-should-show-avatar',
     label: 'should show avatars',
     isChecked: settings.shouldShowAvatars,
@@ -101,5 +116,12 @@ window.U2N.ui.eventsSubscribers.shouldShowAvatars = {
   selector: '#settings-should-show-avatar',
   handleClick: (_, calledByElement) => {
     saveSetting('shouldShowAvatars', calledByElement.checked);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.shouldShowUsernameWhenBetter = {
+  selector: '#settings-should-show-username-when-better',
+  handleClick: (_, calledByElement) => {
+    saveSetting('shouldShowUsernameWhenBetter', calledByElement.checked);
   },
 };

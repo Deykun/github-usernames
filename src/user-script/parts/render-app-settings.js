@@ -41,7 +41,7 @@ export const getAppSettings = ({ isActive = false }) => {
           <br />
           ${getCheckbox({
     idInput: 'settings-should-use-substring',
-    label: 'only use names from profiles when their username contains the specified string (use a comma for multiple)',
+    label: 'only use names from profiles when their username contains the specified string <span style="opacity: 0.5;">(use a comma for multiple)</span>',
     isChecked: settings.shouldFilterBySubstring,
   })}
           ${getTextInput({

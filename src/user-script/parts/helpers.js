@@ -47,22 +47,39 @@ export const getDisplayNameByUsername = (username) => {
   }
 
   const {
-    name,
+    name: nameSetting,
+    shouldShowUsernameWhenBetter,
   } = window.U2N.settings;
 
-  const subnames = user.name.toLowerCase().split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+  if (nameSetting === 'username') {
+    return username;
+  }
 
-  if (name === 'name-surname') {
+  const subnames = user.name.split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+
+  if (shouldShowUsernameWhenBetter) {
+    const nameToCompare = subnames.join(' ');
+    const totalNamesLetters = nameToCompare.match(/[a-zA-Z]/gi).length;
+    const totalUsernamesLetters = username.match(/[a-zA-Z]/gi).length;
+
+    const isUsernameBetter = totalNamesLetters < totalUsernamesLetters && totalNamesLetters < 7;
+
+    if (isUsernameBetter) {
+      return username;
+    }
+  }
+
+  if (nameSetting === 'name-surname') {
     return subnames.join(' ');
   }
 
   const [firstName, ...restOfNames] = subnames;
 
-  if (name === 'name-s') {
+  if (nameSetting === 'name-s') {
     return [firstName, ...restOfNames.map((subname) => `${subname.at(0)}.`)].join(' ');
   }
 
-  if (name === 'name') {
+  if (nameSetting === 'name') {
     return firstName;
   }
 

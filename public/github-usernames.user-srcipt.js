@@ -3,12 +3,12 @@
 // @name            Usernames to names - GitHub
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @author          deykun
-// @version         0.9.0
+// @version         1.0.0
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
-// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
-// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
+// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/public/github-usernames.user-srcipt.js
+// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames/main/public/github-usernames.user-srcipt.js
 // ==/UserScript==
 
 'use strict';
@@ -20,6 +20,7 @@ const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(k
 const defaultSettings = {
   color: 'light',
   name: 'name-s',
+  shouldShowUsernameWhenBetter: true,
   shouldShowAvatars: true,
   shouldFilterBySubstring: false,
   filterSubstring: '',
@@ -30,8 +31,8 @@ const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 
 window.U2N = {
-  version: '0.9.0',
-  isDevMode: true,
+  version: '1.0.0',
+  isDevMode: false,
   cache: {
     HTML: {},
     CSS: {},
@@ -333,22 +334,39 @@ const getDisplayNameByUsername = (username) => {
   }
 
   const {
-    name,
+    name: nameSetting,
+    shouldShowUsernameWhenBetter,
   } = window.U2N.settings;
 
-  const subnames = user.name.toLowerCase().split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+  if (nameSetting === 'username') {
+    return username;
+  }
 
-  if (name === 'name-surname') {
+  const subnames = user.name.split(' ').filter(Boolean).map((subname) => upperCaseFirstLetter(subname));
+
+  if (shouldShowUsernameWhenBetter) {
+    const nameToCompare = subnames.join(' ');
+    const totalNamesLetters = nameToCompare.match(/[a-zA-Z]/gi).length;
+    const totalUsernamesLetters = username.match(/[a-zA-Z]/gi).length;
+
+    const isUsernameBetter = totalNamesLetters < totalUsernamesLetters && totalNamesLetters < 7;
+
+    if (isUsernameBetter) {
+      return username;
+    }
+  }
+
+  if (nameSetting === 'name-surname') {
     return subnames.join(' ');
   }
 
   const [firstName, ...restOfNames] = subnames;
 
-  if (name === 'name-s') {
+  if (nameSetting === 'name-s') {
     return [firstName, ...restOfNames.map((subname) => `${subname.at(0)}.`)].join(' ');
   }
 
-  if (name === 'name') {
+  if (nameSetting === 'name') {
     return firstName;
   }
 
@@ -510,7 +528,7 @@ const getAppSettings = ({ isActive = false }) => {
           <br />
           ${getCheckbox({
     idInput: 'settings-should-use-substring',
-    label: 'only use names from profiles when their username contains the specified string (use a comma for multiple)',
+    label: 'only use names from profiles when their username contains the specified string <span style="opacity: 0.5;">(use a comma for multiple)</span>',
     isChecked: settings.shouldFilterBySubstring,
   })}
           ${getTextInput({
@@ -588,8 +606,18 @@ window.U2N.ui.eventsSubscribers.filterSubstring = {
     {
       label: 'D. Schrute',
       value: 'n-surname',
+    },
+    {
+      label: 'DSchrute911 <span style="opacity: 0.5;">(github\'s default)</span>',
+      value: 'username',
     }],
 };
+
+appendCSS(`
+  .u2u-names-list li:last-child {
+    grid-column: 1 / 3;
+  }
+`, { sourceName: 'render-app-theme' });
 
 const getAppTheme = ({ isActive = false }) => {
   const { settings } = window.U2N;
@@ -605,7 +633,7 @@ const getAppTheme = ({ isActive = false }) => {
             <h3>Color</h3>
             <ul class="grid-2">
               ${themeSettings.colors.map(({ label, value }) => `<li>
-              ${getRadiobox({
+  ${getRadiobox({
     name: 'color',
     classNameInput: 'u2n-theme-color',
     label,
@@ -616,9 +644,9 @@ const getAppTheme = ({ isActive = false }) => {
           </div>
           <div>
             <h3>Display name</h3>
-            <ul class="grid-2">
-            ${themeSettings.names.map(({ label, value }) => `<li>
-            ${getRadiobox({
+            <ul class="grid-2 u2u-names-list">
+            ${themeSettings.names.map(({ label, value }, index) => `<li>
+  ${getRadiobox({
     name: 'names',
     classNameInput: 'u2n-theme-name',
     label,
@@ -628,8 +656,13 @@ const getAppTheme = ({ isActive = false }) => {
             </ul>
           </div>
           <div>
-            <h3>Other</h3>
-            ${getCheckbox({
+            <h3>Other</h3>       
+  ${getCheckbox({
+    idInput: 'settings-should-show-username-when-better',
+    label: 'should show the username when it fits better',
+    isChecked: settings.shouldShowUsernameWhenBetter,
+  })}
+  ${getCheckbox({
     idInput: 'settings-should-show-avatar',
     label: 'should show avatars',
     isChecked: settings.shouldShowAvatars,
@@ -658,6 +691,13 @@ window.U2N.ui.eventsSubscribers.shouldShowAvatars = {
   selector: '#settings-should-show-avatar',
   handleClick: (_, calledByElement) => {
     saveSetting('shouldShowAvatars', calledByElement.checked);
+  },
+};
+
+window.U2N.ui.eventsSubscribers.shouldShowUsernameWhenBetter = {
+  selector: '#settings-should-show-username-when-better',
+  handleClick: (_, calledByElement) => {
+    saveSetting('shouldShowUsernameWhenBetter', calledByElement.checked);
   },
 };
 
@@ -1050,6 +1090,10 @@ appendCSS(`
     display: inline-block;
     font-size: 0;
     text-overflow: unset !important;
+  }
+  
+  .user-mention[data-u2n-cache-user] {
+    background-color: transparent !important;
   }
 
   .u2n-tag {

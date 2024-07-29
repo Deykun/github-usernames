@@ -5,6 +5,7 @@ const getFromLocalStorage = (key, defaultValues = {}) => (localStorage.getItem(k
 const defaultSettings = {
   color: 'light',
   name: 'name-s',
+  shouldShowUsernameWhenBetter: true,
   shouldShowAvatars: true,
   shouldFilterBySubstring: false,
   filterSubstring: '',
@@ -16,7 +17,7 @@ const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-nam
 
 window.U2N = {
   version: 'SCRIPT_VERSION',
-  isDevMode: true,
+  isDevMode: false,
   cache: {
     HTML: {},
     CSS: {},
