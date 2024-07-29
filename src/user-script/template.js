@@ -1,14 +1,14 @@
 // ==UserScript==
-// @namespace       deykun
 // @name            Usernames to names - GitHub
 // @description     Replace ambiguous usernames with actual names from user profiles.
+// @namespace       deykun
 // @author          deykun
 // @version         SCRIPT_VERSION
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
-// @updateURL       https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
-// @downloadURL     https://raw.githubusercontent.com/Deykun/github-usernames/main/github-usernames.user-srcipt.js
+// @updateURL       https://deykun.github.io/github-usernames/github-usernames.user-srcipt.js
+// @downloadURL     https://deykun.github.io/github-usernames/github-usernames.user-srcipt.js
 // ==/UserScript==
 
 'use strict';
