@@ -49,6 +49,10 @@ appendCSS(`
     font-size: 0;
     text-overflow: unset !important;
   }
+  
+  .user-mention[data-u2n-cache-user] {
+    background-color: transparent !important;
+  }
 
   .u2n-tag {
     align-self: center;
