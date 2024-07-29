@@ -1,22 +1,19 @@
-# Usernames to names - GitHub
+# Show user profile names instead of usernames on GitHub
 
-Replace the username with the actual name of the user from their profile. This is useful if you work in an organization where usernames are ambiguous.
+## Why?
 
-## How to install?
-1. Install https://www.tampermonkey.net/
-2. Go to https://raw.githubusercontent.com/Deykun/github-usernames/main/public/github-usernames.user-srcipt.js
+In many organizations with company user accounts, the username is not easily associated with actual persons. Instead of `@JimHelper` 🙂 and `@MichaelScott` 😅, you see `@dundermifflin_302512` 🤖 and `@dundermifflin_302513` 🤖 in pull requests and comments, which makes communication harder.
 
-### Development
+Example:
+https://github.com/orgs/community/discussions/61959
 
-#### One-time setup
-1. Install `src/user-script/dev.user-srcipt.js`.
-2. In the "Settings" tab of Tampermonkey, check the box for waiting on update.
-3. Provide the address `http://localhost:1234/server.user-script.js`.
-4. Install dependecies `npm ci`
+### The solution
 
-#### Using the script
-1. Run `npm run dev-us` in one terminal - It builds the script from base files and watches changes
-2. Run `npm run dev-us-server` in another terminal - serves the dev script as a dependency
-3. [make changes to scripts]
-4. On the script page, in the submenu "Tools" > "Check script update availability".
-5. F5 (refresh).
+The script available here swaps usernames with preferred names from profiles ex. Jim Helper, Jim H. (if available). It allows you to set custom names for picked users and limit these options only to users with specific patterns in their usernames. For instance, `dundermifflin` would swap names only for this organization
+
+## Instalation
+
+1. Install https://www.tampermonkey.net/ - It is a very popular browser extension that allows you to add custom scripts to selected domains.
+  - In our case, you will add a script to github.com.
+  - You can check the code if you are worried about security: it doesn't touch tokens at all.
+2. Go to https://deykun.github.io/github-usernames/github-usernames.user.js
