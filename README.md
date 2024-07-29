@@ -16,4 +16,5 @@ The script available here swaps usernames with preferred names from profiles ex.
 1. Install https://www.tampermonkey.net/ - It is a very popular browser extension that allows you to add custom scripts to selected domains.
   - In our case, you will add a script to github.com.
   - You can check the code if you are worried about security: it doesn't touch tokens at all.
+  - Manifest3 requires enabling development mode (as described on the page). Alternatively, you can use the Manifest2 version, which will work faster (M3 only trusts extensions with predefined scripts, but TM by design, allows any type of scripts to be added)
 2. Go to https://deykun.github.io/github-usernames/github-usernames.user.js
