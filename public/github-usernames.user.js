@@ -1041,7 +1041,7 @@ const renderStatus = () => {
 };
 
     const getUserElements = () => {
-  const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
+  const hovercardUrls = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
 
     if (username && el.textContent.includes(username)) {
@@ -1054,7 +1054,24 @@ const renderStatus = () => {
     return undefined;
   }).filter(Boolean);
 
-  return links;
+  const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
+    const username = el.textContent.trim();
+
+    if (username) {
+      return {
+        el,
+        username,
+        shouldSkipIfNotCached: true,
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  return [
+    ...hovercardUrls,
+    ...kanbanListItems,
+  ];
 };
 
 appendCSS(` 
@@ -1170,13 +1187,26 @@ const renderUsers = () => {
     document.body.setAttribute('data-u2n-color', color);
   }
 
-  elements.forEach(({ el, username }) => {
-    const user = window.U2N.usersByUsernames?.[username];
-    const displayName = getDisplayNameByUsername(username);
+  elements.forEach(({ el, username: usernameFromElement, shouldSkipIfNotCached }) => {
+    let username = usernameFromElement;
+    let user = window.U2N.usersByUsernames?.[username];
+    let displayName = getDisplayNameByUsername(username);
+    const previousCacheValue = el.getAttribute('data-u2n-cache-user') || '';
 
-    const cacheValue = `${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+    if (!user && shouldSkipIfNotCached) {
+      const previousUsername = previousCacheValue.split('|')[0];
+      username = previousUsername;
+      user = window.U2N.usersByUsernames?.[username];
+      displayName = getDisplayNameByUsername(username);
 
-    const isAlreadySet = el.getAttribute('data-u2n-cache-user') === cacheValue;
+      if (!user) {
+        return;
+      }
+    }
+
+    const cacheValue = `${username}|${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = previousCacheValue === cacheValue;
     if (isAlreadySet) {
       return;
     }
