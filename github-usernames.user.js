@@ -3,7 +3,7 @@
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @namespace       deykun
 // @author          deykun
-// @version         1.0.0
+// @version         1.1.0
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
@@ -31,7 +31,7 @@ const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 
 window.U2N = {
-  version: '1.0.0',
+  version: '1.1.0',
   isDevMode: false,
   cache: {
     HTML: {},
@@ -224,6 +224,10 @@ const resetUsers = () => {
   });
 };
 
+const getIsSavedUser = (username) => {
+  return Boolean(username && window.U2N.usersByUsernames?.[username]);
+};
+
     const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
@@ -297,6 +301,22 @@ const nestedSelectors = (selectors, subcontents) => {
 };
 
 const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
+
+const joinWithAnd = (items) => {
+  if (items.length === 0) {
+    return '';
+  }
+  if (items.length === 1) {
+    return items[0];
+  }
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`;
+  }
+
+  const allButLast = items.slice(0, -1).join(', ');
+  const last = items[items.length - 1];
+  return `${allButLast} and ${last}`;
+};
 
 const getShouldUseUsernameAsDisplayname = (username) => {
   const {
@@ -1040,8 +1060,10 @@ const renderStatus = () => {
 </span>`, 'u2n-status');
 };
 
-    const getUserElements = () => {
-  const links = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
+    const dataU2NSource = 'data-u2n-source';
+
+const getUserElements = () => {
+  const hovercardUrls = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
 
     if (username && el.textContent.includes(username)) {
@@ -1054,7 +1076,64 @@ const renderStatus = () => {
     return undefined;
   }).filter(Boolean);
 
-  return links;
+  const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
+    const username = el.getAttribute(dataU2NSource) || el.textContent.trim();
+
+    const isSavedUser = getIsSavedUser(username);
+    if (isSavedUser) {
+      return {
+        el,
+        username,
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  const tooltipsItems = Array.from(document.querySelectorAll('[data-visible-text]')).map((el) => {
+    const username = el.getAttribute(dataU2NSource) || el.getAttribute('data-visible-text').trim();
+
+    const isSavedUser = getIsSavedUser(username);
+    if (isSavedUser) {
+      return {
+        el,
+        username,
+        updateAttributeInstead: 'data-visible-text',
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  return [
+    ...hovercardUrls,
+    ...kanbanListItems,
+    ...tooltipsItems,
+  ];
+};
+
+const getGroupedUserElements = () => {
+  /* Example page https://github.com/orgs/input-output-hk/projects/102/ */
+  const projectsCellItems = Array.from(document.querySelectorAll('[role="gridcell"]:has([data-component="Avatar"] + span, [data-avatar-count] + span)')).map((el) => {
+    const source = el.getAttribute(dataU2NSource) || el.textContent.trim() || '';
+    const usernames = source.replace(' and ', ', ').split(', ').filter(Boolean);
+
+    const hasSavedUsername = (usernames?.length || 0) > 0 && usernames.some(getIsSavedUser);
+
+    if (hasSavedUsername) {
+      return {
+        el,
+        usernames,
+        source,
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  return [
+    ...projectsCellItems,
+  ];
 };
 
 appendCSS(` 
@@ -1087,9 +1166,15 @@ appendCSS(`
   }
 
   [data-u2n-cache-user] {
-    display: inline-block;
+    display: inline-flex;
+    justify-content: start;
+    vertical-align: middle;
     font-size: 0;
     text-overflow: unset !important;
+  }
+
+  [data-u2n-cache-user] [class*="ActionList-ActionListSubContent"] {
+    display: none;
   }
   
   .user-mention[data-u2n-cache-user] {
@@ -1148,6 +1233,7 @@ appendCSS(`
   ${nestedSelectors([
     '.gh-header', // pr header on pr site
     '.u2n-nav-user-preview', // preview in user tab
+    '[data-testid="list-row-repo-name-and-number"]', // prs in repo
     '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
     '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
     '.timeline-comment-header', // comments headers
@@ -1159,7 +1245,6 @@ appendCSS(`
 `, { sourceName: 'render-users' });
 
 const renderUsers = () => {
-  const elements = getUserElements();
   const {
     color,
     shouldShowAvatars,
@@ -1170,18 +1255,29 @@ const renderUsers = () => {
     document.body.setAttribute('data-u2n-color', color);
   }
 
-  elements.forEach(({ el, username }) => {
+  const userElements = getUserElements();
+
+  userElements.forEach(({ el, username: usernameFromElement, updateAttributeInstead }) => {
+    const username = usernameFromElement;
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
+    const previousCacheValue = el.getAttribute('data-u2n-cache-user') || '';
 
-    const cacheValue = `${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
+    const cacheValue = `${username}|${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
 
-    const isAlreadySet = el.getAttribute('data-u2n-cache-user') === cacheValue;
+    const isAlreadySet = previousCacheValue === cacheValue;
     if (isAlreadySet) {
       return;
     }
 
+    el.setAttribute(dataU2NSource, username);
     el.setAttribute('data-u2n-cache-user', cacheValue);
+
+    if (updateAttributeInstead) {
+      el.setAttribute(updateAttributeInstead, displayName);
+
+      return;
+    }
 
     el.querySelector('.u2n-tags-holder')?.remove();
 
@@ -1204,6 +1300,33 @@ const renderUsers = () => {
     tagsHolderEl.append(tagEl);
 
     el.append(tagsHolderEl);
+  });
+
+  const groupedUsersElements = getGroupedUserElements();
+
+  groupedUsersElements.forEach(({ el, usernames: usernamesFromElement, source }) => {
+    const hasSavedUsername = usernamesFromElement.some(getIsSavedUser);
+
+    if (!hasSavedUsername) {
+      return;
+    }
+
+    const displayNames = usernamesFromElement.map((username) => getDisplayNameByUsername(username));
+    const displayNamesString = joinWithAnd(displayNames);
+
+    const previousCacheValue = el.getAttribute('data-u2n-cache-user') || '';
+
+    const cacheValue = `${source}|${displayNamesString}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = previousCacheValue === cacheValue;
+    if (isAlreadySet) {
+      return;
+    }
+
+    el.setAttribute(dataU2NSource, source);
+    el.setAttribute('data-u2n-cache-user', cacheValue);
+
+    Array.from(el.querySelectorAll('span')).at(-1).textContent = displayNamesString;
   });
 };
 
