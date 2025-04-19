@@ -1055,13 +1055,30 @@ const renderStatus = () => {
   }).filter(Boolean);
 
   const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
-    const username = el.textContent.trim();
+    const username = el.getAttribute('data-u2n-username') || el.textContent.trim();
 
-    if (username) {
+    const isSavedUsername = Boolean(username && window.U2N.usersByUsernames?.[username]);
+
+    if (isSavedUsername) {
       return {
         el,
         username,
-        shouldSkipIfNotCached: true,
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  const tooltipsItems = Array.from(document.querySelectorAll('[data-visible-text]')).map((el) => {
+    const username = el.getAttribute('data-u2n-username') || el.getAttribute('data-visible-text').trim();
+
+    const isSavedUsername = Boolean(username && window.U2N.usersByUsernames?.[username]);
+
+    if (isSavedUsername) {
+      return {
+        el,
+        username,
+        updateAttributeInstead: 'data-visible-text',
       };
     }
 
@@ -1071,6 +1088,7 @@ const renderStatus = () => {
   return [
     ...hovercardUrls,
     ...kanbanListItems,
+    ...tooltipsItems,
   ];
 };
 
@@ -1187,22 +1205,11 @@ const renderUsers = () => {
     document.body.setAttribute('data-u2n-color', color);
   }
 
-  elements.forEach(({ el, username: usernameFromElement, shouldSkipIfNotCached }) => {
-    let username = usernameFromElement;
-    let user = window.U2N.usersByUsernames?.[username];
-    let displayName = getDisplayNameByUsername(username);
+  elements.forEach(({ el, username: usernameFromElement, updateAttributeInstead }) => {
+    const username = usernameFromElement;
+    const user = window.U2N.usersByUsernames?.[username];
+    const displayName = getDisplayNameByUsername(username);
     const previousCacheValue = el.getAttribute('data-u2n-cache-user') || '';
-
-    if (!user && shouldSkipIfNotCached) {
-      const previousUsername = previousCacheValue.split('|')[0];
-      username = previousUsername;
-      user = window.U2N.usersByUsernames?.[username];
-      displayName = getDisplayNameByUsername(username);
-
-      if (!user) {
-        return;
-      }
-    }
 
     const cacheValue = `${username}|${displayName}${user ? '+u' : '-u'}${shouldShowAvatars ? '+a' : '-a'}`;
 
@@ -1211,7 +1218,14 @@ const renderUsers = () => {
       return;
     }
 
+    el.setAttribute('data-u2n-username', username);
     el.setAttribute('data-u2n-cache-user', cacheValue);
+
+    if (updateAttributeInstead) {
+      el.setAttribute(updateAttributeInstead, displayName);
+
+      return;
+    }
 
     el.querySelector('.u2n-tags-holder')?.remove();
 
