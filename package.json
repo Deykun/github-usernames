@@ -1,7 +1,7 @@
 {
   "name": "github-usernames",
   "private": true,
-  "version": "1.1.1",
+  "version": "1.1.2",
   "type": "module",
   "author": "Szymon Tondowski",
   "license": "MIT",
