@@ -302,6 +302,22 @@ const nestedSelectors = (selectors, subcontents) => {
 
 const upperCaseFirstLetter = (text) => (typeof text === 'string' ? text.charAt(0).toUpperCase() + text.slice(1) : '');
 
+const joinWithAnd = (items) => {
+  if (items.length === 0) {
+    return '';
+  }
+  if (items.length === 1) {
+    return items[0];
+  }
+  if (items.length === 2) {
+    return `${items[0]} and ${items[1]}`;
+  }
+
+  const allButLast = items.slice(0, -1).join(', ');
+  const last = items[items.length - 1];
+  return `${allButLast} and ${last}`;
+};
+
 const getShouldUseUsernameAsDisplayname = (username) => {
   const {
     shouldFilterBySubstring,
@@ -1044,7 +1060,7 @@ const renderStatus = () => {
 </span>`, 'u2n-status');
 };
 
-    
+    const dataU2NSource = 'data-u2n-source';
 
 const getUserElements = () => {
   const hovercardUrls = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
@@ -1061,7 +1077,7 @@ const getUserElements = () => {
   }).filter(Boolean);
 
   const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
-    const username = el.getAttribute('data-u2n-username') || el.textContent.trim();
+    const username = el.getAttribute(dataU2NSource) || el.textContent.trim();
 
     const isSavedUsername = isSavedUser(username);
 
@@ -1076,7 +1092,7 @@ const getUserElements = () => {
   }).filter(Boolean);
 
   const tooltipsItems = Array.from(document.querySelectorAll('[data-visible-text]')).map((el) => {
-    const username = el.getAttribute('data-u2n-username') || el.getAttribute('data-visible-text').trim();
+    const username = el.getAttribute(dataU2NSource) || el.getAttribute('data-visible-text').trim();
 
     const isSavedUsername = isSavedUser(username);
 
@@ -1101,7 +1117,8 @@ const getUserElements = () => {
 const getGroupedUserElements = () => {
   /* Example page https://github.com/orgs/input-output-hk/projects/102/views/1 */
   const projectsCellItems = Array.from(document.querySelectorAll('[role="gridcell"]:has([data-component="Avatar"] + span, [data-avatar-count] + span)')).map((el) => {
-    const usernames = el.textContent.trim().replace(' and ', ', ').split(', ').filter(Boolean);
+    const source = el.textContent.trim();
+    const usernames = el.getAttribute(dataU2NSource) || source.replace(' and ', ', ').split(', ').filter(Boolean);
 
     const hasSavedUsername = usernames.some(isSavedUser);
 
@@ -1109,6 +1126,7 @@ const getGroupedUserElements = () => {
       return {
         el,
         usernames,
+        source,
       };
     }
 
@@ -1248,7 +1266,7 @@ const renderUsers = () => {
       return;
     }
 
-    el.setAttribute('data-u2n-username', username);
+    el.setAttribute(dataU2NSource, username);
     el.setAttribute('data-u2n-cache-user', cacheValue);
 
     if (updateAttributeInstead) {
@@ -1281,6 +1299,22 @@ const renderUsers = () => {
   });
 
   const groupedUsersElements = getGroupedUserElements();
+
+  groupedUsersElements.forEach(({ el, usernames: usernamesFromElement, source }) => {
+    console.log('usernamesFromElement', usernamesFromElement);
+    const hasSavedUsername = usernamesFromElement.some(isSavedUser);
+
+    if (!hasSavedUsername) {
+      return;
+    }
+
+    const displayNames = usernamesFromElement.map((username) => getDisplayNameByUsername(username));
+    const displayNamesString = joinWithAnd(displayNames);
+
+    console.log(displayNamesString);
+
+    Array.from(el.querySelectorAll('span')).at(-1).textContent = displayNamesString;
+  });
 };
 
     const getUserFromUserPageIfPossible = () => {
