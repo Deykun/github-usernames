@@ -224,6 +224,10 @@ const resetUsers = () => {
   });
 };
 
+const isSavedUser = (username) => {
+  return Boolean(username && window.U2N.usersByUsernames?.[username]);
+};
+
     const appendCSS = (styles, { sourceName = '' } = {}) => {
   const appendOnceSelector = sourceName ? `g-u2n-css-${sourceName}`.trim() : undefined;
   if (appendOnceSelector) {
@@ -1040,7 +1044,9 @@ const renderStatus = () => {
 </span>`, 'u2n-status');
 };
 
-    const getUserElements = () => {
+    
+
+const getUserElements = () => {
   const hovercardUrls = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
 
@@ -1057,7 +1063,7 @@ const renderStatus = () => {
   const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
     const username = el.getAttribute('data-u2n-username') || el.textContent.trim();
 
-    const isSavedUsername = Boolean(username && window.U2N.usersByUsernames?.[username]);
+    const isSavedUsername = isSavedUser(username);
 
     if (isSavedUsername) {
       return {
@@ -1072,7 +1078,7 @@ const renderStatus = () => {
   const tooltipsItems = Array.from(document.querySelectorAll('[data-visible-text]')).map((el) => {
     const username = el.getAttribute('data-u2n-username') || el.getAttribute('data-visible-text').trim();
 
-    const isSavedUsername = Boolean(username && window.U2N.usersByUsernames?.[username]);
+    const isSavedUsername = isSavedUser(username);
 
     if (isSavedUsername) {
       return {
@@ -1089,6 +1095,28 @@ const renderStatus = () => {
     ...hovercardUrls,
     ...kanbanListItems,
     ...tooltipsItems,
+  ];
+};
+
+const getGroupedUserElements = () => {
+  /* Example page https://github.com/orgs/input-output-hk/projects/102/views/1 */
+  const projectsCellItems = Array.from(document.querySelectorAll('[role="gridcell"]:has([data-component="Avatar"] + span, [data-avatar-count] + span)')).map((el) => {
+    const usernames = el.textContent.trim().replace(' and ', ', ').split(', ').filter(Boolean);
+
+    const hasSavedUsername = usernames.some(isSavedUser);
+
+    if (hasSavedUsername) {
+      return {
+        el,
+        usernames,
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  return [
+    ...projectsCellItems,
   ];
 };
 
@@ -1194,7 +1222,7 @@ appendCSS(`
 `, { sourceName: 'render-users' });
 
 const renderUsers = () => {
-  const elements = getUserElements();
+
   const {
     color,
     shouldShowAvatars,
@@ -1205,7 +1233,9 @@ const renderUsers = () => {
     document.body.setAttribute('data-u2n-color', color);
   }
 
-  elements.forEach(({ el, username: usernameFromElement, updateAttributeInstead }) => {
+  const userElements = getUserElements();
+
+  userElements.forEach(({ el, username: usernameFromElement, updateAttributeInstead }) => {
     const username = usernameFromElement;
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
@@ -1249,6 +1279,8 @@ const renderUsers = () => {
 
     el.append(tagsHolderEl);
   });
+
+  const groupedUsersElements = getGroupedUserElements();
 };
 
     const getUserFromUserPageIfPossible = () => {

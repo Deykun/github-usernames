@@ -10,6 +10,8 @@ console.log('');
 console.log(chalk.green('UserScript endpoints are live!'));
 console.log(' - http://localhost:1234/server.user-script.js');
 console.log('');
+console.log('(An updated version of the script will be downloaded when you check for updates in Tampermonkey)');
+console.log('');
 
 userScriptApp.get('/server.user-script.js', (req, res) => {
     const devScript = fs.readFileSync('src/user-script/dev.user-srcipt.js', 'utf-8');

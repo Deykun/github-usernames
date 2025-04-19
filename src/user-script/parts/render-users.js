@@ -1,3 +1,5 @@
+
+
 const getUserElements = () => {
   const hovercardUrls = Array.from(document.querySelectorAll('[data-hovercard-url^="/users/"]')).map((el) => {
     const username = el.getAttribute('data-hovercard-url').match(/users\/([A-Za-z0-9_-]+)\//)[1];
@@ -15,7 +17,7 @@ const getUserElements = () => {
   const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
     const username = el.getAttribute('data-u2n-username') || el.textContent.trim();
 
-    const isSavedUsername = Boolean(username && window.U2N.usersByUsernames?.[username]);
+    const isSavedUsername = isSavedUser(username);
 
     if (isSavedUsername) {
       return {
@@ -30,7 +32,7 @@ const getUserElements = () => {
   const tooltipsItems = Array.from(document.querySelectorAll('[data-visible-text]')).map((el) => {
     const username = el.getAttribute('data-u2n-username') || el.getAttribute('data-visible-text').trim();
 
-    const isSavedUsername = Boolean(username && window.U2N.usersByUsernames?.[username]);
+    const isSavedUsername = isSavedUser(username);
 
     if (isSavedUsername) {
       return {
@@ -47,6 +49,28 @@ const getUserElements = () => {
     ...hovercardUrls,
     ...kanbanListItems,
     ...tooltipsItems,
+  ];
+};
+
+const getGroupedUserElements = () => {
+  /* Example page https://github.com/orgs/input-output-hk/projects/102/views/1 */
+  const projectsCellItems = Array.from(document.querySelectorAll('[role="gridcell"]:has([data-component="Avatar"] + span, [data-avatar-count] + span)')).map((el) => {
+    const usernames = el.textContent.trim().replace(' and ', ', ').split(', ').filter(Boolean);
+
+    const hasSavedUsername = usernames.some(isSavedUser);
+
+    if (hasSavedUsername) {
+      return {
+        el,
+        usernames,
+      };
+    }
+
+    return undefined;
+  }).filter(Boolean);
+
+  return [
+    ...projectsCellItems,
   ];
 };
 
@@ -152,7 +176,7 @@ appendCSS(`
 `, { sourceName: 'render-users' });
 
 export const renderUsers = () => {
-  const elements = getUserElements();
+
   const {
     color,
     shouldShowAvatars,
@@ -163,7 +187,9 @@ export const renderUsers = () => {
     document.body.setAttribute('data-u2n-color', color);
   }
 
-  elements.forEach(({ el, username: usernameFromElement, updateAttributeInstead }) => {
+  const userElements = getUserElements();
+
+  userElements.forEach(({ el, username: usernameFromElement, updateAttributeInstead }) => {
     const username = usernameFromElement;
     const user = window.U2N.usersByUsernames?.[username];
     const displayName = getDisplayNameByUsername(username);
@@ -207,4 +233,6 @@ export const renderUsers = () => {
 
     el.append(tagsHolderEl);
   });
+
+  const groupedUsersElements = getGroupedUserElements();
 };

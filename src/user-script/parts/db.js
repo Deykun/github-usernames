@@ -130,3 +130,7 @@ const resetUsers = () => {
     text: "The users' data were removed.",
   });
 };
+
+const isSavedUser = (username) => {
+  return Boolean(username && window.U2N.usersByUsernames?.[username]);
+};
