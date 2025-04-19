@@ -53,12 +53,12 @@ const getUserElements = () => {
 };
 
 const getGroupedUserElements = () => {
-  /* Example page https://github.com/orgs/input-output-hk/projects/102/views/1 */
+  /* Example page https://github.com/orgs/input-output-hk/projects/102/ */
   const projectsCellItems = Array.from(document.querySelectorAll('[role="gridcell"]:has([data-component="Avatar"] + span, [data-avatar-count] + span)')).map((el) => {
-    const source = el.textContent.trim();
-    const usernames = el.getAttribute(dataU2NSource) || source.replace(' and ', ', ').split(', ').filter(Boolean);
+    const source = el.getAttribute(dataU2NSource) || el.textContent.trim() || '';
+    const usernames = source.replace(' and ', ', ').split(', ').filter(Boolean);
 
-    const hasSavedUsername = usernames.some(isSavedUser);
+    const hasSavedUsername = (usernames?.length || 0) > 0 && usernames.some(isSavedUser);
 
     if (hasSavedUsername) {
       return {
@@ -106,9 +106,15 @@ appendCSS(`
   }
 
   [data-u2n-cache-user] {
-    display: inline-block;
+    display: inline-flex;
+    justify-content: start;
+    vertical-align: middle;
     font-size: 0;
     text-overflow: unset !important;
+  }
+
+  [data-u2n-cache-user] [class*="ActionList-ActionListSubContent"] {
+    display: none;
   }
   
   .user-mention[data-u2n-cache-user] {
@@ -167,6 +173,7 @@ appendCSS(`
   ${nestedSelectors([
     '.gh-header', // pr header on pr site
     '.u2n-nav-user-preview', // preview in user tab
+    '[data-testid="list-row-repo-name-and-number"]', // prs in repo
     '[data-issue-and-pr-hovercards-enabled] [id*="issue_"]', // prs in repo
     '[data-issue-and-pr-hovercards-enabled] [id*="check_"]', // actions in repo
     '.timeline-comment-header', // comments headers
@@ -178,7 +185,6 @@ appendCSS(`
 `, { sourceName: 'render-users' });
 
 export const renderUsers = () => {
-
   const {
     color,
     shouldShowAvatars,
@@ -239,7 +245,6 @@ export const renderUsers = () => {
   const groupedUsersElements = getGroupedUserElements();
 
   groupedUsersElements.forEach(({ el, usernames: usernamesFromElement, source }) => {
-    console.log('usernamesFromElement', usernamesFromElement);
     const hasSavedUsername = usernamesFromElement.some(isSavedUser);
 
     if (!hasSavedUsername) {
@@ -249,7 +254,17 @@ export const renderUsers = () => {
     const displayNames = usernamesFromElement.map((username) => getDisplayNameByUsername(username));
     const displayNamesString = joinWithAnd(displayNames);
 
-    console.log(displayNamesString);
+    const previousCacheValue = el.getAttribute('data-u2n-cache-user') || '';
+
+    const cacheValue = `${source}|${displayNamesString}${shouldShowAvatars ? '+a' : '-a'}`;
+
+    const isAlreadySet = previousCacheValue === cacheValue;
+    if (isAlreadySet) {
+      return;
+    }
+
+    el.setAttribute(dataU2NSource, source);
+    el.setAttribute('data-u2n-cache-user', cacheValue);
 
     Array.from(el.querySelectorAll('span')).at(-1).textContent = displayNamesString;
   });
