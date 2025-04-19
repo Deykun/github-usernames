@@ -3,7 +3,7 @@
 // @description     Replace ambiguous usernames with actual names from user profiles.
 // @namespace       deykun
 // @author          deykun
-// @version         1.1.1
+// @version         1.1.2
 // @include         https://github.com*
 // @grant           none
 // @run-at          document-start
@@ -31,7 +31,7 @@ const getUsersByUsernamesFromLS = () => getFromLocalStorage('u2n-users');
 const getCustomNamesByUsernamesFromLS = () => getFromLocalStorage('u2n-users-names');
 
 window.U2N = {
-  version: '1.1.1',
+  version: '1.1.2',
   isDevMode: false,
   cache: {
     HTML: {},
@@ -1163,6 +1163,10 @@ appendCSS(`
     --u2n-user-bg: #163b13;
     --u2n-user-text--hover: #b8ffb3;
     --u2n-user-bg--hover: #30582d;
+  }
+
+  *:has(> [data-u2n-cache-user]) {
+    vertical-align: middle;
   }
 
   [data-u2n-cache-user][data-u2n-cache-user][data-u2n-cache-user] {
