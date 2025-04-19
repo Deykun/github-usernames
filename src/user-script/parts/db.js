@@ -131,6 +131,6 @@ const resetUsers = () => {
   });
 };
 
-const isSavedUser = (username) => {
+const getIsSavedUser = (username) => {
   return Boolean(username && window.U2N.usersByUsernames?.[username]);
 };

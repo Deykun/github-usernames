@@ -17,9 +17,8 @@ const getUserElements = () => {
   const kanbanListItems = Array.from(document.querySelectorAll('[class*="slicer-items-module__title"]')).map((el) => {
     const username = el.getAttribute(dataU2NSource) || el.textContent.trim();
 
-    const isSavedUsername = isSavedUser(username);
-
-    if (isSavedUsername) {
+    const isSavedUser = getIsSavedUser(username);
+    if (isSavedUser) {
       return {
         el,
         username,
@@ -32,9 +31,8 @@ const getUserElements = () => {
   const tooltipsItems = Array.from(document.querySelectorAll('[data-visible-text]')).map((el) => {
     const username = el.getAttribute(dataU2NSource) || el.getAttribute('data-visible-text').trim();
 
-    const isSavedUsername = isSavedUser(username);
-
-    if (isSavedUsername) {
+    const isSavedUser = getIsSavedUser(username);
+    if (isSavedUser) {
       return {
         el,
         username,
@@ -58,7 +56,7 @@ const getGroupedUserElements = () => {
     const source = el.getAttribute(dataU2NSource) || el.textContent.trim() || '';
     const usernames = source.replace(' and ', ', ').split(', ').filter(Boolean);
 
-    const hasSavedUsername = (usernames?.length || 0) > 0 && usernames.some(isSavedUser);
+    const hasSavedUsername = (usernames?.length || 0) > 0 && usernames.some(getIsSavedUser);
 
     if (hasSavedUsername) {
       return {
@@ -245,7 +243,7 @@ export const renderUsers = () => {
   const groupedUsersElements = getGroupedUserElements();
 
   groupedUsersElements.forEach(({ el, usernames: usernamesFromElement, source }) => {
-    const hasSavedUsername = usernamesFromElement.some(isSavedUser);
+    const hasSavedUsername = usernamesFromElement.some(getIsSavedUser);
 
     if (!hasSavedUsername) {
       return;
