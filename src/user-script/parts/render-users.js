@@ -103,7 +103,7 @@ appendCSS(`
     --u2n-user-bg--hover: #30582d;
   }
 
-  [data-u2n-cache-user] {
+  [data-u2n-cache-user][data-u2n-cache-user][data-u2n-cache-user] {
     display: inline-flex;
     justify-content: start;
     vertical-align: middle;
