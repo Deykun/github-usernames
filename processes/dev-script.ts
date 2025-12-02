@@ -14,7 +14,7 @@ console.log('(An updated version of the script will be downloaded when you check
 console.log('');
 
 userScriptApp.get('/server.user-script.js', (req, res) => {
-    const devScript = fs.readFileSync('src/user-script/dev.user-srcipt.js', 'utf-8');
+    const devScript = fs.readFileSync('src/user-script/dev.user-script.js', 'utf-8');
 
     const version = `2.${Math.floor((new Date()).getTime() / 1000)}`;
 
