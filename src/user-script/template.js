@@ -43,11 +43,11 @@ const domReady = (fn) => {
 };
 
 const initU2N = async () => {
-  if (window.U2N.cache.inited) {
+  if (window.U2N.cache.wasInited) {
     return;
   }
 
-  window.U2N.cache.inited = true;
+  window.U2N.cache.wasInited = true;
 
   try {
     /* import @/db.js */
