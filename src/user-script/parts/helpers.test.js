@@ -3,6 +3,6 @@ import { upperCaseFirstLetter } from './helpers';
 
 describe('upperCaseFirstLetter', () => {
   it('upperCaseFirstLetter() - should capitalize', () => {
-    expect(upperCaseFirstLetter('jonh')).toBe('Jonh');
+    expect(upperCaseFirstLetter('john')).toBe('John');
   });
 });

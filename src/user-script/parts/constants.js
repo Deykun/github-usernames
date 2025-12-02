@@ -21,7 +21,7 @@ window.U2N = {
   cache: {
     HTML: {},
     CSS: {},
-    inited: false,
+    wasInited: false,
     status: null,
     location: location.href,
   },

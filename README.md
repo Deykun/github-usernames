@@ -11,7 +11,7 @@ https://github.com/orgs/community/discussions/61959
 
 The script available here swaps usernames with preferred names from profiles ex. Jim Helper, Jim H. (if available). It allows you to set custom names for picked users and limit these options only to users with specific patterns in their usernames. For instance limit to `dundermifflin` would swap names only for this organization.
 
-## Instalation
+## Installation
 
 1. Install https://www.tampermonkey.net/ - It is a very popular browser extension that allows you to add custom scripts to selected domains.
 
@@ -21,7 +21,7 @@ The script available here swaps usernames with preferred names from profiles ex.
 
 2. Go to https://deykun.github.io/github-usernames/github-usernames.user.js
 
-![Instalation demo](docs/demo-install.gif)
+![Installation demo](docs/demo-install.gif)
 
 ### Saving users names
 
